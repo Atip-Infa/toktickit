@@ -21,4 +21,3 @@ AI was useful for breaking the Lab 1 requirements into smaller implementation ta
 My prompts build with instructions such as "Implement ONLY Issue X" and "Do not start Issue X+1" so that the implementation stay within the scope of each GitHub Issue.
 I did not rely on the AI output without verification. I inspect the generated changes, checked the Git branch and repository status, run the require tests and also review the Pull Request.
 Uusing ChatGPT for prompt creation and Antigravity IDE Agent for implementation help me work through the Lab 1 requirements while keeping the work separate by Issue and feature branch.
-
