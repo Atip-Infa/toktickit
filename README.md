@@ -1,47 +1,96 @@
-# TokTickIT - Full-Stack IT Service Desk
+# TokTickIT — IT Service Desk
 
-TokTickIT is an IT service desk web application built with React, Vite, Express, PostgreSQL, and Prisma.
+TokTickIT is a full-stack IT service desk web application for handling Account and Access, Hardware, Software, and Network requests.
 
-## Tech Stack
-* **Frontend**: React + TypeScript + Vite + Bootstrap 5
-* **Backend**: Node.js + Express + TypeScript
-* **Database & ORM**: PostgreSQL + Prisma ORM
-* **Testing**: Vitest + Supertest
+## Technology Stack
 
-## Repository Structure
+- **Frontend:** React, TypeScript, Vite, Bootstrap 5
+- **Backend:** Node.js, Express, TypeScript
+- **Database & ORM:** PostgreSQL, Prisma ORM
+- **Testing:** Vitest, Supertest, React Testing Library
+- **Workflow:** Git, GitHub Projects, Feature Branches, Pull Requests
+
+## Project Structure
+
 ```text
 toktickit/
-├── client/       # React + Vite + Bootstrap frontend
-├── server/       # Node.js + Express + Prisma backend
-├── docs/         # Documentation & peer review records
-├── .gitignore    # Git ignore configuration
-└── README.md     # Setup and usage instructions
+├── client/          # React + Vite + Bootstrap frontend
+├── server/          # Express + Prisma + PostgreSQL backend
+│   ├── prisma/      # Prisma schema and seed script
+│   ├── src/         # Express server source code
+│   └── tests/       # API integration tests (Supertest + Vitest)
+├── docs/            # Documentation & engineering records
+│   └── lab-01/      # Lab 1 evidence (ai_use.md, reviewer.md, tests.md)
+├── .gitignore       # Git ignore specifications
+└── README.md        # Setup and usage instructions
 ```
 
-## Setup Instructions
+## Setup & Running Instructions
 
-### Prerequisites
-* Node.js (v18+ recommended)
-* PostgreSQL database instance running locally or via Docker
+### 1. Prerequisites
 
-### 1. Backend Setup (`server/`)
+- Node.js (v18+)
+- PostgreSQL database instance
+
+### 2. Environment Configuration
+
+Copy `.env.example` templates to `.env` in both client and server directories:
+
 ```bash
-cd server
-npm install
-cp .env.example .env
-# Configure DATABASE_URL in .env to match your PostgreSQL instance
-npx prisma generate
-npm run dev
+# Client environment setup
+cp client/.env.example client/.env
+
+# Server environment setup
+cp server/.env.example server/.env
 ```
 
-### 2. Frontend Setup (`client/`)
+Update `server/.env` with your local PostgreSQL database URL:
+```env
+DATABASE_URL="postgresql://<user>:<password>@localhost:5432/<dbname>?schema=public"
+PORT=3000
+```
+
+### 3. Installation
+
+Install dependencies for both client and server:
+
 ```bash
-cd client
-npm install
-cp .env.example .env
-npm run dev
+npm install --prefix client
+npm install --prefix server
 ```
 
-## Running Automated Tests
-* **Client Tests (Vitest)**: `cd client && npm run test`
-* **Server Tests (Vitest + Supertest)**: `cd server && npm run test`
+### 4. Database Setup (Prisma)
+
+Initialize and seed the PostgreSQL database using Prisma:
+
+```bash
+# Run database migrations
+npm --prefix server run prisma:migrate
+
+# Seed starter categories
+npm --prefix server run prisma:seed
+```
+
+### 5. Development Mode
+
+Start the backend API server and frontend Vite development server:
+
+```bash
+# Start backend Express server (http://localhost:3000)
+npm --prefix server run dev
+
+# Start frontend Vite dev server (http://localhost:5173)
+npm --prefix client run dev
+```
+
+### 6. Running Automated Tests
+
+Run unit and integration tests using Vitest and Supertest:
+
+```bash
+# Run client UI tests
+npm --prefix client run test
+
+# Run server API tests
+npm --prefix server run test
+```
