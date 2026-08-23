@@ -34,14 +34,28 @@ export interface CreateTicketInput {
   description: string;
 }
 
+export interface Attachment {
+  id: number;
+  ticketId: number;
+  filename: string;
+  fileSize: number;
+  mimeType: string;
+  uploadedByRequesterId: number;
+  isRemoved: boolean;
+  createdAt: string;
+  removedAt?: string | null;
+  removalReason?: string | null;
+}
+
 export interface Ticket {
   id: number;
   ticketNumber: string;
   requesterId: number;
   categoryId: number;
   relatedSystemId: number;
-  category?: { id: number; name: string };
-  relatedSystem?: { id: number; name: string };
+  category?: { id: number; name: string; code?: string };
+  relatedSystem?: { id: number; name: string; code?: string };
+  requester?: { id: number; name: string; email: string; department?: string };
   requestedPriority: string;
   itPriority: string;
   status: string;
@@ -50,6 +64,7 @@ export interface Ticket {
   itOwnerName?: string | null;
   createdAt: string;
   updatedAt: string;
+  attachments?: Attachment[];
 }
 
 export interface MyTicketsQueryParams {
@@ -158,7 +173,7 @@ export async function uploadAttachment(
   ticketId: number,
   file: File,
   requesterId: number
-): Promise<any> {
+): Promise<Attachment> {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("requesterId", String(requesterId));
@@ -209,4 +224,61 @@ export async function fetchMyTickets(
   }
 
   return json;
+}
+
+export async function fetchTicketDetail(
+  ticketId: number,
+  requesterId: number
+): Promise<Ticket> {
+  const res = await fetch(
+    `${API_URL}/api/tickets/${ticketId}?requesterId=${requesterId}`,
+    {
+      headers: {
+        "X-Requester-Id": String(requesterId),
+      },
+    }
+  ).catch(() => {
+    throw new Error("Unable to connect to TokTickIT API");
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.error || "Failed to fetch ticket detail");
+  }
+
+  return json.data;
+}
+
+export async function softRemoveAttachment(
+  attachmentId: number,
+  removalReason: string,
+  requesterId: number
+): Promise<Attachment> {
+  const res = await fetch(`${API_URL}/api/attachments/${attachmentId}/remove`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Requester-Id": String(requesterId),
+    },
+    body: JSON.stringify({
+      removalReason,
+      requesterId,
+    }),
+  }).catch(() => {
+    throw new Error("Unable to connect to TokTickIT API");
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.error || "Failed to remove attachment");
+  }
+
+  return json.data;
+}
+
+export function getAttachmentDownloadUrl(
+  attachmentId: number,
+  requesterId: number
+): string {
+  return `${API_URL}/api/attachments/${attachmentId}/download?requesterId=${requesterId}`;
 }
