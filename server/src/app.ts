@@ -173,6 +173,60 @@ app.get("/api/tickets", async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/tickets/:id - Get Ticket Detail for owned ticket (Issue #17, BR-06, AC-02, AC-03)
+app.get("/api/tickets/:id", async (req: Request, res: Response) => {
+  try {
+    const ticketId = Number(req.params.id);
+    const requesterId = Number(req.query.requesterId || req.headers["x-requester-id"]);
+
+    if (!ticketId || isNaN(ticketId)) {
+      return res.status(400).json({ error: "Invalid ticket ID" });
+    }
+
+    if (!requesterId || isNaN(requesterId)) {
+      return res.status(400).json({ error: "requesterId is required" });
+    }
+
+    const prisma = getPrisma();
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: ticketId },
+      include: {
+        requester: { select: { id: true, name: true, email: true, department: true } },
+        category: { select: { id: true, name: true, code: true } },
+        relatedSystem: { select: { id: true, name: true, code: true } },
+        attachments: {
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            ticketId: true,
+            filename: true,
+            fileSize: true,
+            mimeType: true,
+            uploadedByRequesterId: true,
+            isRemoved: true,
+            createdAt: true,
+            removedAt: true,
+            removalReason: true,
+          },
+        },
+      },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    // Ownership check (BR-06, AC-03)
+    if (ticket.requesterId !== requesterId) {
+      return res.status(403).json({ error: "Access denied to ticket" });
+    }
+
+    return res.status(200).json({ data: ticket });
+  } catch {
+    return res.status(500).json({ error: "Failed to fetch ticket detail" });
+  }
+});
+
 // POST /api/tickets - Create a new ticket (Issue #13)
 app.post("/api/tickets", async (req: Request, res: Response) => {
   try {

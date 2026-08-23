@@ -5,10 +5,12 @@ import { AppHeader } from "./components/AppHeader.js";
 import { DevelopmentRequesterSelector } from "./components/DevelopmentRequesterSelector.js";
 import { CreateTicketForm } from "./components/CreateTicketForm.js";
 import { MyTicketsView } from "./components/MyTicketsView.js";
+import { TicketDetailView } from "./components/TicketDetailView.js";
 
 function AppContent() {
   const { selectedRequester, isLoading } = useRequester();
   const [currentView, setCurrentView] = useState<string>("my-tickets");
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
 
   if (isLoading) {
     return (
@@ -32,6 +34,10 @@ function AppContent() {
             {currentView === "my-tickets" && (
               <MyTicketsView
                 onCreateTicketClick={() => setCurrentView("create-ticket")}
+                onSelectTicket={(ticketId) => {
+                  setSelectedTicketId(ticketId);
+                  setCurrentView("ticket-detail");
+                }}
               />
             )}
 
@@ -39,6 +45,13 @@ function AppContent() {
               <CreateTicketForm
                 onSuccessViewMyTickets={() => setCurrentView("my-tickets")}
                 onCancel={() => setCurrentView("my-tickets")}
+              />
+            )}
+
+            {currentView === "ticket-detail" && selectedTicketId && (
+              <TicketDetailView
+                ticketId={selectedTicketId}
+                onBack={() => setCurrentView("my-tickets")}
               />
             )}
           </div>
