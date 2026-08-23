@@ -10,11 +10,14 @@ export interface SystemStatus {
   categories: Category[];
 }
 
-// Issue 2 + Issue 4 — call the backend.
-// Steps: fetch `${API_URL}/api/health`; if not ok, throw.
-//        then fetch `${API_URL}/api/categories`; if not ok, throw.
-//        return { online: true, categories }.
-// Throwing on failure lets the UI show a single Offline/error state.
+export interface DevelopmentRequester {
+  id: number;
+  name: string;
+  email: string;
+  department: string;
+  isActive: boolean;
+}
+
 export async function checkSystem(): Promise<SystemStatus> {
   const healthRes = await fetch(`${API_URL}/api/health`).catch(() => {
     throw new Error("Unable to connect to TokTickIT API");
@@ -34,4 +37,17 @@ export async function checkSystem(): Promise<SystemStatus> {
 
   const categories: Category[] = await categoriesRes.json();
   return { online: true, categories };
+}
+
+export async function fetchActiveRequesters(): Promise<DevelopmentRequester[]> {
+  const res = await fetch(`${API_URL}/api/requesters`).catch(() => {
+    throw new Error("Unable to connect to TokTickIT API");
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to load Development Requesters");
+  }
+
+  const json = await res.json();
+  return Array.isArray(json) ? json : json.data || [];
 }
