@@ -105,6 +105,74 @@ app.get("/api/related-systems", async (_req: Request, res: Response) => {
   }
 });
 
+// GET /api/tickets - Query paginated tickets for selected Requester (Issue #16, BR-06, BR-19, BR-20, BR-21, AC-10)
+app.get("/api/tickets", async (req: Request, res: Response) => {
+  try {
+    const requesterId = Number(req.query.requesterId || req.headers["x-requester-id"]);
+    if (!requesterId || isNaN(requesterId)) {
+      return res.status(400).json({ error: "requesterId is required" });
+    }
+
+    const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+    const category = req.query.category ? Number(req.query.category) : undefined;
+    const priority = typeof req.query.priority === "string" && req.query.priority.trim() ? req.query.priority.trim() : undefined;
+    const status = typeof req.query.status === "string" && req.query.status.trim() ? req.query.status.trim() : undefined;
+    const sortBy = typeof req.query.sortBy === "string" && ["createdAt", "ticketNumber", "updatedAt"].includes(req.query.sortBy.trim()) ? req.query.sortBy.trim() : "createdAt";
+    const sortOrder = typeof req.query.sortOrder === "string" && req.query.sortOrder.toLowerCase() === "asc" ? "asc" : "desc";
+    const page = req.query.page ? Math.max(1, Number(req.query.page)) : 1;
+    const pageSize = req.query.pageSize ? Math.min(50, Math.max(1, Number(req.query.pageSize))) : 10;
+
+    const where: any = {
+      requesterId,
+    };
+
+    if (category && !isNaN(category)) {
+      where.categoryId = category;
+    }
+    if (priority) {
+      where.requestedPriority = priority;
+    }
+    if (status) {
+      where.status = status;
+    }
+    if (search) {
+      where.OR = [
+        { ticketNumber: { contains: search, mode: "insensitive" } },
+        { summary: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const prisma = getPrisma();
+    const totalItems = await prisma.ticket.count({ where });
+    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+    const skip = (page - 1) * pageSize;
+
+    const tickets = await prisma.ticket.findMany({
+      where,
+      orderBy: [{ [sortBy]: sortOrder }, { id: "desc" }],
+      skip,
+      take: pageSize,
+      include: {
+        category: { select: { id: true, name: true, code: true } },
+        relatedSystem: { select: { id: true, name: true, code: true } },
+        requester: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    return res.status(200).json({
+      data: tickets,
+      meta: {
+        page,
+        pageSize,
+        totalItems,
+        totalPages,
+      },
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to fetch tickets" });
+  }
+});
+
 // POST /api/tickets - Create a new ticket (Issue #13)
 app.post("/api/tickets", async (req: Request, res: Response) => {
   try {

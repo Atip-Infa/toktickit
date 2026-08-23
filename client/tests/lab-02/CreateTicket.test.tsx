@@ -80,8 +80,16 @@ describe("Create Ticket Experience (Issue #15)", () => {
     });
   });
 
-  it("renders Create Ticket form with API-loaded categories and systems", async () => {
+  const navigateToCreateTicket = async () => {
     render(<App />);
+    await waitFor(() => {
+      expect(screen.getAllByRole("button", { name: /➕ Create Ticket/i })[0]).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getAllByRole("button", { name: /➕ Create Ticket/i })[0]);
+  };
+
+  it("renders Create Ticket form with API-loaded categories and systems", async () => {
+    await navigateToCreateTicket();
 
     await waitFor(() => {
       expect(
@@ -95,7 +103,7 @@ describe("Create Ticket Experience (Issue #15)", () => {
   });
 
   it("displays field-level validation errors when submitting invalid inputs (UI-02, AC-04, BR-08)", async () => {
-    render(<App />);
+    await navigateToCreateTicket();
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /Submit Ticket/i })).toBeInTheDocument();
@@ -121,7 +129,7 @@ describe("Create Ticket Experience (Issue #15)", () => {
   });
 
   it("submits valid form data and displays official Ticket Number (AC-01, BR-01)", async () => {
-    render(<App />);
+    await navigateToCreateTicket();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/Ticket Summary/i)).toBeInTheDocument();
@@ -178,10 +186,21 @@ describe("Create Ticket Experience (Issue #15)", () => {
         } as Response);
       }
 
+      if (urlStr.includes("/api/tickets")) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [],
+              meta: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 },
+            }),
+        } as Response);
+      }
+
       return Promise.reject(new Error("Unknown route"));
     });
 
-    render(<App />);
+    await navigateToCreateTicket();
 
     await waitFor(() => {
       expect(screen.getByLabelText(/Ticket Summary/i)).toBeInTheDocument();

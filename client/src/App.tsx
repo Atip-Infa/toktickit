@@ -4,10 +4,11 @@ import { RequesterProvider, useRequester } from "./context/RequesterContext.js";
 import { AppHeader } from "./components/AppHeader.js";
 import { DevelopmentRequesterSelector } from "./components/DevelopmentRequesterSelector.js";
 import { CreateTicketForm } from "./components/CreateTicketForm.js";
+import { MyTicketsView } from "./components/MyTicketsView.js";
 
 function AppContent() {
   const { selectedRequester, isLoading } = useRequester();
-  const [currentView, setCurrentView] = useState<string>("create-ticket");
+  const [currentView, setCurrentView] = useState<string>("my-tickets");
 
   if (isLoading) {
     return (
@@ -28,28 +29,17 @@ function AppContent() {
           <DevelopmentRequesterSelector />
         ) : (
           <div>
+            {currentView === "my-tickets" && (
+              <MyTicketsView
+                onCreateTicketClick={() => setCurrentView("create-ticket")}
+              />
+            )}
+
             {currentView === "create-ticket" && (
               <CreateTicketForm
                 onSuccessViewMyTickets={() => setCurrentView("my-tickets")}
                 onCancel={() => setCurrentView("my-tickets")}
               />
-            )}
-
-            {currentView === "my-tickets" && (
-              <div className="container py-4">
-                <div className="zen-card p-4 text-center py-5">
-                  <h2 className="h5 fw-semibold mb-2">My Tickets</h2>
-                  <p className="text-muted small mb-3">
-                    My Tickets list view will be implemented in Issue #16.
-                  </p>
-                  <button
-                    className="btn zen-btn-primary"
-                    onClick={() => setCurrentView("create-ticket")}
-                  >
-                    ➕ Create IT Support Ticket
-                  </button>
-                </div>
-              </div>
             )}
           </div>
         )}
