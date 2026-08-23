@@ -3,10 +3,11 @@ import "./zen-green.css";
 import { RequesterProvider, useRequester } from "./context/RequesterContext.js";
 import { AppHeader } from "./components/AppHeader.js";
 import { DevelopmentRequesterSelector } from "./components/DevelopmentRequesterSelector.js";
+import { CreateTicketForm } from "./components/CreateTicketForm.js";
 
 function AppContent() {
   const { selectedRequester, isLoading } = useRequester();
-  const [currentView, setCurrentView] = useState<string>("my-tickets");
+  const [currentView, setCurrentView] = useState<string>("create-ticket");
 
   if (isLoading) {
     return (
@@ -26,36 +27,28 @@ function AppContent() {
         {!selectedRequester ? (
           <DevelopmentRequesterSelector />
         ) : (
-          <div className="container py-4">
-            <div className="zen-card p-4 mb-4">
-              <div className="d-flex align-items-center justify-content-between">
-                <div>
-                  <span className="badge zen-badge-active mb-2">Development Testing Session</span>
-                  <h1 className="h4 fw-bold mb-1">
-                    Welcome, {selectedRequester.name}
-                  </h1>
-                  <p className="text-muted small mb-0">
-                    Department: {selectedRequester.department} | Email: {selectedRequester.email}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {currentView === "my-tickets" && (
-              <div className="zen-card p-4 text-center py-5">
-                <h2 className="h5 fw-semibold mb-2">My Tickets</h2>
-                <p className="text-muted small mb-0">
-                  Select a feature to continue testing context for {selectedRequester.name}.
-                </p>
-              </div>
+          <div>
+            {currentView === "create-ticket" && (
+              <CreateTicketForm
+                onSuccessViewMyTickets={() => setCurrentView("my-tickets")}
+                onCancel={() => setCurrentView("my-tickets")}
+              />
             )}
 
-            {currentView === "create-ticket" && (
-              <div className="zen-card p-4 text-center py-5">
-                <h2 className="h5 fw-semibold mb-2">Create Ticket</h2>
-                <p className="text-muted small mb-0">
-                  Create ticket form will be implemented in Issue #13.
-                </p>
+            {currentView === "my-tickets" && (
+              <div className="container py-4">
+                <div className="zen-card p-4 text-center py-5">
+                  <h2 className="h5 fw-semibold mb-2">My Tickets</h2>
+                  <p className="text-muted small mb-3">
+                    My Tickets list view will be implemented in Issue #16.
+                  </p>
+                  <button
+                    className="btn zen-btn-primary"
+                    onClick={() => setCurrentView("create-ticket")}
+                  >
+                    ➕ Create IT Support Ticket
+                  </button>
+                </div>
               </div>
             )}
           </div>

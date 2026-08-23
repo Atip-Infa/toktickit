@@ -69,7 +69,7 @@ describe("Development Requester Selection Screen & Context", () => {
     fireEvent.click(continueBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Welcome, Jennifer Anderson/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Jennifer Anderson/i })).toBeInTheDocument();
     });
 
     expect(localStorage.getItem("toktickit_dev_requester_id")).toBe("1");
@@ -81,7 +81,7 @@ describe("Development Requester Selection Screen & Context", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Welcome, Jennifer Anderson/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Jennifer Anderson/i })).toBeInTheDocument();
     });
 
     const userBtn = screen.getByRole("button", { name: /Jennifer Anderson/i });
