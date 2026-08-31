@@ -1,0 +1,17 @@
+{
+  "name": "toktickit-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:server": "npm --prefix server test -- tests/lab-02",
+    "test:client": "npm --prefix client test -- tests/lab-02",
+    "test:e2e": "npx playwright test e2e/lab-02",
+    "test:lab-02": "npm run test:server && npm run test:client && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^26.4.0",
+    "typescript": "^7.0.2"
+  }
+}
