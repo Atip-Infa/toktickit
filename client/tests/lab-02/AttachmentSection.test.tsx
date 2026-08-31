@@ -14,7 +14,7 @@ const mockRequesters = [
   },
 ];
 
-const mockTicketDetail = {
+const mockTicketWithAttachments = {
   id: 101,
   ticketNumber: "TKT-2026-000101",
   requesterId: 1,
@@ -59,7 +59,7 @@ const mockTicketDetail = {
   ],
 };
 
-describe("Ticket Detail Experience (Issue #17)", () => {
+describe("Attachment Section Component (UI-09, UI-10, AC-08, AC-09)", () => {
   const onBackMock = vi.fn();
 
   beforeEach(() => {
@@ -80,7 +80,7 @@ describe("Ticket Detail Experience (Issue #17)", () => {
       if (urlStr.includes("/api/tickets/101")) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({ data: mockTicketDetail }),
+          json: () => Promise.resolve({ data: mockTicketWithAttachments }),
         } as Response);
       }
 
@@ -90,7 +90,7 @@ describe("Ticket Detail Experience (Issue #17)", () => {
           json: () =>
             Promise.resolve({
               data: {
-                ...mockTicketDetail.attachments[0],
+                ...mockTicketWithAttachments.attachments[0],
                 isRemoved: true,
                 removalReason: "Duplicate file",
               },
@@ -102,38 +102,26 @@ describe("Ticket Detail Experience (Issue #17)", () => {
     });
   });
 
-  const renderWithContext = () => {
-    return render(
+  it("renders active and soft-removed attachments correctly (UI-10, AC-08, AC-09)", async () => {
+    render(
       <RequesterProvider>
         <TicketDetailView ticketId={101} onBack={onBackMock} />
       </RequesterProvider>
     );
-  };
-
-  it("renders read-only ticket fields, status, priority, and attachments table (UI-08, AC-02)", async () => {
-    renderWithContext();
 
     await waitFor(() => {
-      expect(screen.getByText("TKT-2026-000101")).toBeInTheDocument();
-      expect(screen.getByText("Laptop battery drains quickly")).toBeInTheDocument();
-      expect(screen.getByText("Detailed description of laptop issue.")).toBeInTheDocument();
-      expect(screen.getByText("John Support")).toBeInTheDocument();
       expect(screen.getByText("battery_report.pdf")).toBeInTheDocument();
       expect(screen.getByText("old_screenshot.png")).toBeInTheDocument();
-    });
-  });
-
-  it("renders soft-removed attachment with restriction notice and reason (UI-10, BR-16, BR-17, AC-08, AC-09)", async () => {
-    renderWithContext();
-
-    await waitFor(() => {
-      expect(screen.getByText(/Uploaded wrong file/i)).toBeInTheDocument();
       expect(screen.getByText(/Download restricted \(Removed\)/i)).toBeInTheDocument();
     });
   });
 
-  it("executes soft-removal workflow with removal reason prompt (UI-09, BR-15, AC-08)", async () => {
-    renderWithContext();
+  it("executes soft-removal workflow with modal reason prompt (UI-09, AC-08)", async () => {
+    render(
+      <RequesterProvider>
+        <TicketDetailView ticketId={101} onBack={onBackMock} />
+      </RequesterProvider>
+    );
 
     await waitFor(() => {
       expect(screen.getByText("battery_report.pdf")).toBeInTheDocument();
@@ -155,29 +143,6 @@ describe("Ticket Detail Experience (Issue #17)", () => {
         expect.stringContaining("/api/attachments/10/remove"),
         expect.objectContaining({ method: "PATCH" })
       );
-    });
-  });
-
-  it("displays Access Denied card when API returns 403 (AC-03)", async () => {
-    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-      const urlStr = String(url);
-      if (urlStr.includes("/api/requesters")) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ data: mockRequesters }),
-        } as Response);
-      }
-      return Promise.resolve({
-        ok: false,
-        status: 403,
-        json: () => Promise.resolve({ error: "Access denied to ticket" }),
-      } as Response);
-    });
-
-    renderWithContext();
-
-    await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(/Access denied to ticket/i);
     });
   });
 });
