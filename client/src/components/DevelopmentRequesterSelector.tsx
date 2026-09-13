@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { DevelopmentRequester, fetchActiveRequesters } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
 
-export const DevelopmentRequesterSelector: React.FC = () => {
+interface DevelopmentRequesterSelectorProps {
+  onSwitchToLogin?: () => void;
+}
+
+export const DevelopmentRequesterSelector: React.FC<DevelopmentRequesterSelectorProps> = ({ onSwitchToLogin }) => {
   const { selectRequester } = useRequester();
   const [requesters, setRequesters] = useState<DevelopmentRequester[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
@@ -127,7 +131,7 @@ export const DevelopmentRequesterSelector: React.FC = () => {
               </div>
             </div>
 
-            <div className="d-flex justify-content-end gap-2">
+            <div className="d-flex flex-column gap-2">
               <button
                 type="submit"
                 className="btn zen-btn-primary w-100"
@@ -135,6 +139,15 @@ export const DevelopmentRequesterSelector: React.FC = () => {
               >
                 Continue &rarr;
               </button>
+              {onSwitchToLogin && (
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm w-100"
+                  onClick={onSwitchToLogin}
+                >
+                  🔑 Switch to Real Login
+                </button>
+              )}
             </div>
           </form>
         )}

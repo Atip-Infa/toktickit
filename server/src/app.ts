@@ -756,7 +756,7 @@ app.get(
       }
 
       const orderBy: any = {};
-      if (["createdAt", "updatedAt", "itPriority", "requestedPriority", "status", "id"].includes(sortBy)) {
+      if (["createdAt", "updatedAt", "itPriority", "requestedPriority", "status", "ticketNumber", "id"].includes(sortBy)) {
         orderBy[sortBy] = sortOrder;
       } else {
         orderBy.createdAt = "desc";

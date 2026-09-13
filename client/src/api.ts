@@ -522,8 +522,8 @@ export async function fetchStaffTickets(
 
   const res = await fetch(`${API_URL}/api/staff/tickets?${query.toString()}`, {
     headers: getAuthHeaders(),
-  }).catch(() => {
-    throw new Error("Unable to connect to TokTickIT API");
+  }).catch((err: any) => {
+    throw new Error(err?.message || "Unable to connect to TokTickIT API");
   });
 
   const json = await res.json();

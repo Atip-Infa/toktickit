@@ -51,7 +51,7 @@ function MainApp() {
 
   if (!user && !selectedRequester) {
     if (authMode === "dev-selector") {
-      return <DevelopmentRequesterSelector />;
+      return <DevelopmentRequesterSelector onSwitchToLogin={() => setAuthMode("login")} />;
     }
     return <LoginView />;
   }
