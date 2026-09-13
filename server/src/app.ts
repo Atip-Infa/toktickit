@@ -1352,15 +1352,19 @@ app.patch(
           .json({ error: "Cannot deactivate your own account" });
       }
 
-      // Safety check: Cannot deactivate last active Administrator
-      if (isActive === false && existingUser.role === "ADMINISTRATOR") {
-        const activeAdminCount = await prisma.user.count({
-          where: { role: "ADMINISTRATOR", isActive: true },
-        });
-        if (activeAdminCount <= 1) {
-          return res
-            .status(400)
-            .json({ error: "Cannot deactivate the last active administrator" });
+      // Safety check: Cannot deactivate or demote last active Administrator
+      if (existingUser.role === "ADMINISTRATOR" && existingUser.isActive) {
+        const isDeactivating = isActive === false;
+        const isDemoting = role && role !== "ADMINISTRATOR";
+        if (isDeactivating || isDemoting) {
+          const activeAdminCount = await prisma.user.count({
+            where: { role: "ADMINISTRATOR", isActive: true },
+          });
+          if (activeAdminCount <= 1) {
+            return res
+              .status(400)
+              .json({ error: "Cannot deactivate or demote the last active administrator" });
+          }
         }
       }
 
