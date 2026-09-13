@@ -127,6 +127,22 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
     }
   };
 
+  const getAllowedStatuses = (currentStatus: string) => {
+    const map: Record<string, string[]> = {
+      NEW: ["NEW", "OPEN", "ASSIGNED", "IN_PROGRESS", "CANCELLED"],
+      OPEN: ["OPEN", "IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "CANCELLED"],
+      ASSIGNED: ["ASSIGNED", "IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "CANCELLED"],
+      IN_PROGRESS: ["IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "RESOLVED", "CANCELLED"],
+      WAITING_FOR_REQUESTER: ["WAITING_FOR_REQUESTER", "PENDING_CLIENT", "IN_PROGRESS", "RESOLVED", "CANCELLED"],
+      PENDING_CLIENT: ["PENDING_CLIENT", "WAITING_FOR_REQUESTER", "IN_PROGRESS", "RESOLVED", "CANCELLED"],
+      RESOLVED: ["RESOLVED", "CLOSED", "REOPENED"],
+      CLOSED: ["CLOSED", "REOPENED"],
+      REOPENED: ["REOPENED", "IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "RESOLVED"],
+      CANCELLED: ["CANCELLED"],
+    };
+    return map[currentStatus] || [currentStatus];
+  };
+
   const getStatusBadge = (s: string) => {
     switch (s) {
       case "NEW":
@@ -302,13 +318,11 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
-                  <option value="NEW">NEW</option>
-                  <option value="ASSIGNED">ASSIGNED</option>
-                  <option value="IN_PROGRESS">IN PROGRESS</option>
-                  <option value="PENDING_CLIENT">PENDING CLIENT</option>
-                  <option value="RESOLVED">RESOLVED</option>
-                  <option value="CLOSED">CLOSED</option>
-                  <option value="CANCELLED">CANCELLED</option>
+                  {getAllowedStatuses(ticket.status).map((st) => (
+                    <option key={st} value={st}>
+                      {st.replace(/_/g, " ")}
+                    </option>
+                  ))}
                 </select>
               </div>
 
