@@ -53,6 +53,7 @@ export const DevelopmentRequesterSelector: React.FC = () => {
           </svg>
         </div>
 
+        <div className="text-center fw-bold text-success small mb-1">TokTickIT</div>
         <h2 className="h4 text-center fw-bold mb-2">Select Development Requester</h2>
         <p className="text-muted text-center small mb-4">
           Choose a development requester to simulate the current requester context for Lab 2.

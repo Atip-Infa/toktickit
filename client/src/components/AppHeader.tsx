@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext.js";
 import { useRequester } from "../context/RequesterContext.js";
 
 interface AppHeaderProps {
@@ -10,79 +11,135 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   currentView = "my-tickets",
   onNavigate = () => {},
 }) => {
+  const { user, logout } = useAuth();
   const { selectedRequester, clearRequester } = useRequester();
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const getRoleBadgeClass = (role?: string) => {
+    switch (role) {
+      case "ADMINISTRATOR":
+        return "bg-danger text-white";
+      case "IT_STAFF":
+        return "bg-info text-dark";
+      case "REQUESTER":
+      default:
+        return "bg-success bg-opacity-75 text-white";
+    }
+  };
+
+  const formatRoleLabel = (role?: string) => {
+    switch (role) {
+      case "ADMINISTRATOR":
+        return "Administrator";
+      case "IT_STAFF":
+        return "IT Staff";
+      case "REQUESTER":
+      default:
+        return "Requester";
+    }
+  };
+
+  const activeRole = user?.role || (selectedRequester ? "REQUESTER" : undefined);
+
   return (
-    <header className="zen-header w-100 px-3 px-md-4 py-2">
-      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
-        {/* Brand */}
-        <div
-          className="zen-brand d-flex align-items-center gap-2 cursor-pointer me-auto me-md-0"
-          onClick={() => onNavigate("my-tickets")}
+    <header
+      className="navbar navbar-expand-lg navbar-dark shadow-sm px-3 px-lg-4"
+      style={{ backgroundColor: "#055037" }}
+    >
+      <div className="container-fluid px-0">
+        {/* Brand Logo & Name */}
+        <button
+          className="navbar-brand border-0 bg-transparent d-flex align-items-center gap-2 p-0 text-white fw-bold me-4"
+          onClick={() => {
+            if (activeRole === "REQUESTER") onNavigate("my-tickets");
+            else if (activeRole === "IT_STAFF") onNavigate("staff-queue");
+            else if (activeRole === "ADMINISTRATOR") onNavigate("user-management");
+          }}
           style={{ cursor: "pointer" }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="currentColor"
-            className="bi bi-clock-history flex-shrink-0"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.756.205 1.115.356l-.349.919zM1.3 6c.112-.42.261-.826.444-1.213l-.91-.418A8.002 8.002 0 0 0 .3 6H1.3zm1.614-2.614a7.003 7.003 0 0 0-.825.688l-.707-.707a8.003 8.003 0 0 1 .989-.824l.543.843zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z" />
-          </svg>
-          <span className="fw-bold">TokTickIT</span>
+          <span className="fs-4">⏱️</span>
+          <span className="fs-4 tracking-tight">TokTickIT</span>
+        </button>
+
+        {/* Role-Based Navigation Links */}
+        <div className="d-flex align-items-center gap-2 me-auto">
+          {activeRole === "REQUESTER" && (
+            <>
+              <button
+                className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
+                  currentView === "my-tickets" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
+                }`}
+                onClick={() => onNavigate("my-tickets")}
+              >
+                📋 My Tickets
+              </button>
+              <button
+                className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
+                  currentView === "create-ticket" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
+                }`}
+                onClick={() => onNavigate("create-ticket")}
+              >
+                ➕ Create Ticket
+              </button>
+            </>
+          )}
+
+          {(activeRole === "IT_STAFF" || activeRole === "ADMINISTRATOR") && (
+            <button
+              className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
+                currentView === "staff-queue" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
+              }`}
+              onClick={() => onNavigate("staff-queue")}
+            >
+              📋 IT Ticket Queue
+            </button>
+          )}
+
+          {activeRole === "ADMINISTRATOR" && (
+            <button
+              className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
+                currentView === "user-management" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
+              }`}
+              onClick={() => onNavigate("user-management")}
+            >
+              👥 User Management
+            </button>
+          )}
         </div>
 
-        {/* Navigation Tabs - Desktop (md and up) */}
-        {selectedRequester && (
-          <nav className="d-none d-md-flex gap-2">
-            <button
-              className={`btn btn-link nav-link px-3 py-1 text-white ${
-                currentView === "my-tickets"
-                  ? "fw-bold border-bottom border-3 border-light"
-                  : "opacity-75"
-              }`}
-              onClick={() => onNavigate("my-tickets")}
-            >
-              📋 My Tickets
-            </button>
-            <button
-              className={`btn btn-link nav-link px-3 py-1 text-white ${
-                currentView === "create-ticket"
-                  ? "fw-bold border-bottom border-3 border-light"
-                  : "opacity-75"
-              }`}
-              onClick={() => onNavigate("create-ticket")}
-            >
-              ➕ Create Ticket
-            </button>
-          </nav>
-        )}
+        {/* User Identity Profile & Logout / Dev Requester Dropdown */}
+        {user ? (
+          <div className="d-flex align-items-center gap-3 ms-auto">
+            <div className="d-flex align-items-center gap-2 text-white">
+              <div
+                className="rounded-circle bg-white text-success fw-bold d-flex align-items-center justify-content-center"
+                style={{ width: "32px", height: "32px", fontSize: "14px", color: "#055037" }}
+              >
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="d-none d-sm-block text-end">
+                <div className="fw-semibold fs-7 leading-tight">{user.name}</div>
+                <span className={`badge rounded-pill px-2 py-1 fs-8 ${getRoleBadgeClass(user.role)}`}>
+                  {formatRoleLabel(user.role)}
+                </span>
+              </div>
+            </div>
 
-        {/* User Context & Change Requester */}
-        {selectedRequester && (
-          <div className="position-relative">
+            <button
+              className="btn btn-outline-light btn-sm rounded-3 px-3 fw-medium"
+              onClick={() => logout()}
+              title="Sign out of TokTickIT"
+            >
+              Logout
+            </button>
+          </div>
+        ) : selectedRequester ? (
+          <div className="position-relative ms-auto">
             <button
               className="btn btn-outline-light btn-sm d-flex align-items-center gap-1 gap-sm-2 text-nowrap"
               onClick={() => setShowDropdown(!showDropdown)}
               aria-expanded={showDropdown}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                className="bi bi-person-circle flex-shrink-0"
-                viewBox="0 0 16 16"
-              >
-                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                <path
-                  fillRule="evenodd"
-                  d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
-                />
-              </svg>
               <span className="fw-semibold text-truncate d-inline-block" style={{ maxWidth: "220px" }}>
                 {selectedRequester.name}
               </span>
@@ -112,34 +169,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </div>
             )}
           </div>
-        )}
+        ) : null}
       </div>
-
-      {/* Navigation Tabs - Mobile (< md) */}
-      {selectedRequester && (
-        <nav className="d-flex d-md-none justify-content-around border-top border-light border-opacity-25 pt-2 mt-2 w-100">
-          <button
-            className={`btn btn-link nav-link px-2 py-1 text-white ${
-              currentView === "my-tickets"
-                ? "fw-bold border-bottom border-3 border-light"
-                : "opacity-75"
-            }`}
-            onClick={() => onNavigate("my-tickets")}
-          >
-            📋 My Tickets
-          </button>
-          <button
-            className={`btn btn-link nav-link px-2 py-1 text-white ${
-              currentView === "create-ticket"
-                ? "fw-bold border-bottom border-3 border-light"
-                : "opacity-75"
-            }`}
-            onClick={() => onNavigate("create-ticket")}
-          >
-            ➕ Create Ticket
-          </button>
-        </nav>
-      )}
     </header>
   );
 };
