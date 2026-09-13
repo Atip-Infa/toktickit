@@ -840,19 +840,36 @@ app.patch(
         dataToUpdate.itPriority = itPriority;
       }
 
-      if (status) {
-        const validStatuses = [
-          "NEW",
-          "ASSIGNED",
-          "IN_PROGRESS",
-          "PENDING_CLIENT",
-          "RESOLVED",
-          "CLOSED",
-          "CANCELLED",
-        ];
-        if (!validStatuses.includes(status)) {
-          return res.status(400).json({ error: "Invalid status value" });
+      if (status && status !== existing.status) {
+        const allowedTransitionsMap: Record<string, string[]> = {
+          NEW: ["OPEN", "ASSIGNED", "IN_PROGRESS", "CANCELLED"],
+          OPEN: ["IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "CANCELLED"],
+          ASSIGNED: ["IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "CANCELLED"],
+          IN_PROGRESS: ["WAITING_FOR_REQUESTER", "PENDING_CLIENT", "RESOLVED", "CANCELLED"],
+          WAITING_FOR_REQUESTER: ["IN_PROGRESS", "RESOLVED", "CANCELLED"],
+          PENDING_CLIENT: ["IN_PROGRESS", "RESOLVED", "CANCELLED"],
+          RESOLVED: ["CLOSED", "REOPENED"],
+          CLOSED: ["REOPENED"],
+          REOPENED: ["IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "RESOLVED"],
+          CANCELLED: [],
+        };
+
+        const allowed = allowedTransitionsMap[existing.status] || [];
+        if (!allowed.includes(status)) {
+          return res.status(400).json({
+            error: `Invalid status transition from ${existing.status} to ${status}`,
+          });
         }
+
+        if (
+          (status === "RESOLVED" || status === "CLOSED") &&
+          (!resolutionSummary || typeof resolutionSummary !== "string" || !resolutionSummary.trim())
+        ) {
+          return res.status(400).json({
+            error: "Resolution summary is required when resolving or closing a ticket",
+          });
+        }
+
         dataToUpdate.status = status;
       }
 
@@ -983,6 +1000,56 @@ app.post(
       });
     } catch (err: any) {
       return res.status(500).json({ error: "Failed to post public comment" });
+    }
+  }
+);
+
+// POST /api/tickets/:id/resolve - Requester "Problem Appears Resolved" indication action
+app.post(
+  "/api/tickets/:id/resolve",
+  requireAuth,
+  requirePasswordChanged,
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      if (req.user!.role === "REQUESTER" && ticket.requesterId !== req.user!.id) {
+        return res.status(403).json({ error: "Access denied to ticket" });
+      }
+
+      // Add a Public Comment indicating problem appears resolved
+      await prisma.publicComment.create({
+        data: {
+          ticketId,
+          authorId: req.user!.id,
+          content: "Requester indicated: Problem Appears Resolved. Requesting IT Staff review.",
+        },
+      });
+
+      const updated = await prisma.ticket.update({
+        where: { id: ticketId },
+        data: { updatedAt: new Date() },
+        include: {
+          requester: { select: { id: true, name: true, email: true, department: true } },
+          owner: { select: { id: true, name: true, email: true } },
+          category: { select: { id: true, name: true, code: true } },
+          relatedSystem: { select: { id: true, name: true, code: true } },
+          attachments: true,
+        },
+      });
+
+      return res.status(200).json({ data: updated });
+    } catch {
+      return res.status(500).json({ error: "Failed to mark problem as resolved" });
     }
   }
 );
