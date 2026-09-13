@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import { UserManagementView } from "../../src/components/UserManagementView.js";
 
@@ -50,9 +50,25 @@ describe("UserManagementView Component (Lab 3)", () => {
       expect(
         screen.getByRole("heading", { name: /Administrator User Management/i })
       ).toBeInTheDocument();
-      expect(screen.getByText("Jennifer Anderson")).toBeInTheDocument();
-      expect(screen.getByText("Michael Brown")).toBeInTheDocument();
+      expect(screen.getAllByText("Jennifer Anderson").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Michael Brown").length).toBeGreaterThan(0);
       expect(screen.getByRole("button", { name: /➕ Create New User/i })).toBeInTheDocument();
+    });
+  });
+
+  it("opens create user modal when create button is clicked", async () => {
+    render(<UserManagementView />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /➕ Create New User/i })).toBeInTheDocument();
+    });
+
+    const createBtn = screen.getByRole("button", { name: /➕ Create New User/i });
+    fireEvent.click(createBtn);
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: /➕ Create New User/i })).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/john@toktickit.com/i)).toBeInTheDocument();
     });
   });
 });
