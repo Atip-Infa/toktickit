@@ -233,31 +233,31 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
   }
 
   return (
-    <div className="container py-4">
-      <div className="zen-card p-4 p-md-5 mx-auto" style={{ maxWidth: 860 }}>
+    <div className="container py-3 py-sm-4">
+      <div className="zen-card p-3 p-sm-4 p-md-5 mx-auto" style={{ maxWidth: 860 }}>
         {/* Header Title */}
-        <div className="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4">
+        <div className="d-flex flex-wrap align-items-center justify-content-between border-bottom pb-3 mb-4 gap-2">
           <div>
             <h1 className="h4 fw-bold mb-1">Create IT Support Ticket</h1>
             <p className="text-muted small mb-0">
               Submit a support request to the IT department for assistance.
             </p>
           </div>
-          <span className="badge zen-badge-active">Requester Mode</span>
+          <span className="badge zen-badge-active flex-shrink-0">Requester Mode</span>
         </div>
 
         {/* Read-Only System Values Section */}
         <div className="p-3 mb-4 rounded" style={{ backgroundColor: "var(--color-field-readonly-bg)", border: "1px solid #E2E8F0" }}>
           <div className="row g-3">
-            <div className="col-md-4">
+            <div className="col-12 col-sm-4">
               <span className="small text-muted d-block mb-1">Ticket Date</span>
               <span className="fw-semibold small">{new Date().toLocaleString()}</span>
             </div>
-            <div className="col-md-4">
+            <div className="col-12 col-sm-4">
               <span className="small text-muted d-block mb-1">Requester Identity</span>
-              <span className="fw-semibold small">{selectedRequester?.name || "N/A"}</span>
+              <span className="fw-semibold small text-break">{selectedRequester?.name || "N/A"}</span>
             </div>
-            <div className="col-md-4">
+            <div className="col-12 col-sm-4">
               <span className="small text-muted d-block mb-1">Current Status</span>
               <span className="badge bg-info text-dark">NEW</span>
             </div>
@@ -332,19 +332,20 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
             {/* Requested Priority */}
             <div className="mb-3">
               <label className="form-label fw-semibold small mb-1">Requested Priority</label>
-              <div className="d-flex flex-wrap gap-2">
+              <div className="row g-2">
                 {["LOW", "MEDIUM", "HIGH", "URGENT"].map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    className={`btn btn-sm ${
-                      requestedPriority === p ? "zen-btn-primary" : "btn-outline-secondary"
-                    }`}
-                    onClick={() => setRequestedPriority(p)}
-                    disabled={isSubmitting}
-                  >
-                    {p}
-                  </button>
+                  <div key={p} className="col-6 col-sm-3">
+                    <button
+                      type="button"
+                      className={`btn btn-sm w-100 ${
+                        requestedPriority === p ? "zen-btn-primary" : "btn-outline-secondary"
+                      }`}
+                      onClick={() => setRequestedPriority(p)}
+                      disabled={isSubmitting}
+                    >
+                      {p}
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -430,14 +431,14 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
                   {attachments.map((file, idx) => (
                     <li
                       key={idx}
-                      className="list-group-item d-flex justify-content-between align-items-center py-2 px-3 small"
+                      className="list-group-item d-flex justify-content-between align-items-center py-2 px-3 small overflow-hidden"
                     >
-                      <span className="text-truncate me-2" style={{ maxWidth: 350 }}>
+                      <span className="text-truncate me-2 flex-grow-1" style={{ minWidth: 0 }}>
                         📎 {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                       <button
                         type="button"
-                        className="btn btn-sm btn-link text-danger p-0"
+                        className="btn btn-sm btn-link text-danger p-0 flex-shrink-0"
                         onClick={() => removeAttachment(idx)}
                         disabled={isSubmitting}
                       >
