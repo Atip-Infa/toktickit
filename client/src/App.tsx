@@ -50,34 +50,10 @@ function MainApp() {
   }
 
   if (!user && !selectedRequester) {
-    if (authMode === "login") {
-      return (
-        <div>
-          <LoginView />
-          <div className="text-center py-2 bg-light border-top">
-            <button
-              className="btn btn-link btn-sm text-decoration-none text-secondary"
-              onClick={() => setAuthMode("dev-selector")}
-            >
-              Switch to Simulated Development Requester (Lab 2 Mode)
-            </button>
-          </div>
-        </div>
-      );
+    if (authMode === "dev-selector") {
+      return <DevelopmentRequesterSelector />;
     }
-    return (
-      <div>
-        <div className="bg-light py-2 text-center border-bottom">
-          <button
-            className="btn btn-link btn-sm text-decoration-none text-success fw-semibold"
-            onClick={() => setAuthMode("login")}
-          >
-            🔒 Switch to Real Login (Lab 3)
-          </button>
-        </div>
-        <DevelopmentRequesterSelector />
-      </div>
-    );
+    return <LoginView />;
   }
 
   if (user && user.mustChangePassword) {

@@ -6,6 +6,7 @@ import {
   fetchCategories,
 } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
+import { useAuth } from "../context/AuthContext.js";
 
 interface MyTicketsViewProps {
   onCreateTicketClick?: () => void;
@@ -17,6 +18,7 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
   onSelectTicket,
 }) => {
   const { selectedRequester } = useRequester();
+  const { user } = useAuth();
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -50,14 +52,15 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
 
   // Fetch tickets whenever query parameters or requester context changes (BR-05, BR-06)
   const loadTickets = async () => {
-    if (!selectedRequester) return;
+    const activeRequesterId = user?.id || selectedRequester?.id;
+    if (!activeRequesterId && !user) return;
 
     setLoading(true);
     setError("");
 
     try {
       const res = await fetchMyTickets({
-        requesterId: selectedRequester.id,
+        requesterId: activeRequesterId,
         search: searchTerm.trim(),
         category: selectedCategory,
         priority: selectedPriority,

@@ -15,7 +15,7 @@ describe("Lab 3 Public Comments & Internal Notes APIs", () => {
     const defaultHash = hashPassword("Password123!");
     await prisma.user.updateMany({
       where: {
-        email: { in: ["jennifer@toktickit.com", "david@toktickit.com", "michael@toktickit.com"] },
+        email: { in: ["jennifer@toktickit.com", "sarah@toktickit.com", "michael@toktickit.com"] },
       },
       data: { passwordHash: defaultHash, mustChangePassword: false, isActive: true },
     });
@@ -26,11 +26,11 @@ describe("Lab 3 Public Comments & Internal Notes APIs", () => {
       .send({ email: "jennifer@toktickit.com", password: "Password123!" });
     requesterToken = jenniferRes.body.token;
 
-    // David (Other Requester)
-    const davidRes = await request(app)
+    // Sarah (Other Requester)
+    const sarahRes = await request(app)
       .post("/api/auth/login")
-      .send({ email: "david@toktickit.com", password: "Password123!" });
-    otherRequesterToken = davidRes.body.token;
+      .send({ email: "sarah@toktickit.com", password: "Password123!" });
+    otherRequesterToken = sarahRes.body.token;
 
     // Michael (IT Staff)
     const michaelRes = await request(app)
