@@ -9,6 +9,7 @@ import {
   Ticket,
 } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
+import { useAuth } from "../context/AuthContext.js";
 
 interface CreateTicketFormProps {
   onSuccessViewMyTickets?: () => void;
@@ -23,6 +24,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
   onCancel,
 }) => {
   const { selectedRequester } = useRequester();
+  const { user } = useAuth();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [relatedSystems, setRelatedSystems] = useState<RelatedSystem[]>([]);
@@ -122,7 +124,8 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
     setUploadWarning("");
 
     if (!validateForm()) return;
-    if (!selectedRequester) {
+    const activeRequesterId = selectedRequester ? selectedRequester.id : user?.id;
+    if (!activeRequesterId) {
       setApiError("No active Development Requester selected.");
       return;
     }
@@ -132,7 +135,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
     try {
       // 1. Create Ticket record
       const ticket = await createTicket({
-        requesterId: selectedRequester.id,
+        requesterId: activeRequesterId,
         categoryId: Number(categoryId),
         relatedSystemId: Number(relatedSystemId),
         requestedPriority,

@@ -8,6 +8,7 @@ import {
   getAttachmentDownloadUrl,
 } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
+import { PublicCommentsSection } from "./PublicCommentsSection.js";
 
 interface TicketDetailViewProps {
   ticketId: number;
@@ -397,6 +398,9 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
           )}
         </div>
       </div>
+
+      {/* Public Comments */}
+      {ticket && <PublicCommentsSection ticketId={ticket.id} />}
 
       {/* Soft Removal Reason Modal / Card overlay */}
       {removingAttachmentId !== null && (
