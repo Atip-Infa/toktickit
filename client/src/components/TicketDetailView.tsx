@@ -185,7 +185,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
   const isMaxAttachmentsReached = activeAttachments.length >= 5;
 
   return (
-    <div className="container py-4" style={{ maxWidth: "920px" }}>
+    <div className="container py-3 py-sm-4" style={{ maxWidth: "920px" }}>
       {/* Back Navigation & Header Bar */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <button className="btn btn-outline-secondary btn-sm" onClick={onBack}>
@@ -198,7 +198,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
       </div>
 
       {/* Main Ticket Read-Only Detail Card */}
-      <div className="zen-card p-4 p-md-5 mb-4">
+      <div className="zen-card p-3 p-sm-4 p-md-5 mb-4">
         {/* Header Title Section */}
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-start border-bottom pb-3 mb-4 gap-2">
           <div>

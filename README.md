@@ -16,19 +16,26 @@ Lab 2 introduces the **Requester Ticketing MVP with Zen Green UI Foundation**, p
 
 ```text
 toktickit/
+├── artifacts/       # Screenshots and lab evidence artifacts
+│   └── lab-02/      # Lab 2 screenshots
 ├── client/          # React + Vite + Bootstrap frontend
 │   ├── src/         # React components, Zen Green tokens, API handlers
 │   └── tests/       # React component tests (Vitest + RTL)
+├── docs/            # Engineering contracts & documentation
+│   ├── lab-01/      # Lab 1 sprint records
+│   └── lab-02/      # Lab 2 sprint contract (specification.md, tests.md, ui-spec.md, api-spec.md, ai-use.md, reviewer.md)
+├── e2e/             # End-to-end automated tests (Playwright)
+│   └── lab-02/      # Lab 2 E2E test specs
 ├── server/          # Express + Prisma + PostgreSQL backend
 │   ├── prisma/      # Prisma schema and seed script
 │   ├── src/         # Express routes, file upload setup, Prisma client
 │   ├── uploads/     # Disk storage for ticket file attachments
 │   └── tests/       # API integration tests (Supertest + Vitest)
-├── docs/            # Engineering contracts & documentation
-│   ├── lab-01/      # Lab 1 sprint records
-│   └── lab-02/      # Lab 2 sprint contract (specification.md, tests.md, ui-spec.md, api-spec.md, ai-use.md, reviewer.md)
 ├── .gitignore       # Git ignore specifications
-└── README.md        # Setup and usage instructions
+├── package.json     # Root project dependencies & scripts
+├── playwright.config.ts # Playwright E2E configuration
+├── README.md        # Setup and usage instructions
+└── tsconfig.json    # Root TypeScript configuration
 ```
 
 ## Setup & Running Instructions

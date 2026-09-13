@@ -8,16 +8,40 @@ datasource db {
 }
 
 model DevelopmentRequester {
-  id          Int          @id @default(autoincrement())
-  name        String       @db.VarChar(100)
-  email       String       @unique @db.VarChar(150)
-  department  String       @db.VarChar(100)
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  tickets     Ticket[]
-  attachments Attachment[]
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  email       String   @unique @db.VarChar(150)
+  department  String   @db.VarChar(100)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   @@map("requesters")
+}
+
+enum Role {
+  REQUESTER
+  IT_STAFF
+  ADMINISTRATOR
+}
+
+model User {
+  id                 Int              @id @default(autoincrement())
+  name               String           @db.VarChar(100)
+  email              String           @unique @db.VarChar(150)
+  department         String?          @db.VarChar(100)
+  passwordHash       String           @db.VarChar(255)
+  role               Role             @default(REQUESTER)
+  mustChangePassword Boolean          @default(true)
+  isActive           Boolean          @default(true)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  submittedTickets   Ticket[]         @relation("RequesterTickets")
+  ownedTickets       Ticket[]         @relation("OwnedTickets")
+  attachments        Attachment[]     @relation("UploadedBy")
+  publicComments     PublicComment[]  @relation("PublicCommentAuthor")
+  internalNotes      InternalNote[]   @relation("InternalNoteAuthor")
+
+  @@map("users")
 }
 
 model Category {
@@ -49,51 +73,85 @@ enum Priority {
 
 enum TicketStatus {
   NEW
+  OPEN
   IN_PROGRESS
-  PENDING
+  WAITING_FOR_REQUESTER
   RESOLVED
   CLOSED
+  REOPENED
+  CANCELLED
 }
 
 model Ticket {
-  id                Int                  @id @default(autoincrement())
-  ticketNumber      String               @unique @db.VarChar(30)
+  id                Int             @id @default(autoincrement())
+  ticketNumber      String          @unique @db.VarChar(30)
   requesterId       Int
   categoryId        Int
   relatedSystemId   Int
-  requestedPriority Priority             @default(MEDIUM)
-  itPriority        Priority             @default(MEDIUM)
-  status            TicketStatus         @default(NEW)
-  summary           String               @db.VarChar(120)
-  description       String               @db.Text
-  itOwnerName       String?              @db.VarChar(100)
-  resolutionSummary String?              @db.Text
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  requester         DevelopmentRequester @relation(fields: [requesterId], references: [id])
-  category          Category             @relation(fields: [categoryId], references: [id])
-  relatedSystem     RelatedSystem        @relation(fields: [relatedSystemId], references: [id])
+  ownerId           Int?
+  requestedPriority Priority        @default(MEDIUM)
+  itPriority        Priority        @default(MEDIUM)
+  status            TicketStatus    @default(NEW)
+  summary           String          @db.VarChar(120)
+  description       String          @db.Text
+  itOwnerName       String?         @db.VarChar(100)
+  resolutionSummary String?         @db.Text
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  requester         User            @relation("RequesterTickets", fields: [requesterId], references: [id])
+  owner             User?           @relation("OwnedTickets", fields: [ownerId], references: [id])
+  category          Category        @relation(fields: [categoryId], references: [id])
+  relatedSystem     RelatedSystem   @relation(fields: [relatedSystemId], references: [id])
   attachments       Attachment[]
+  publicComments    PublicComment[]
+  internalNotes     InternalNote[]
 
   @@index([requesterId, createdAt])
-  @@index([status, categoryId, requestedPriority])
+  @@index([ownerId, status])
+  @@index([status, categoryId, itPriority])
   @@map("tickets")
 }
 
+model PublicComment {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  authorId  Int
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author    User     @relation("PublicCommentAuthor", fields: [authorId], references: [id])
+
+  @@index([ticketId, createdAt])
+  @@map("public_comments")
+}
+
+model InternalNote {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  authorId  Int
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author    User     @relation("InternalNoteAuthor", fields: [authorId], references: [id])
+
+  @@index([ticketId, createdAt])
+  @@map("internal_notes")
+}
+
 model Attachment {
-  id                   Int                  @id @default(autoincrement())
-  ticketId             Int
-  filename             String               @db.VarChar(255)
-  storagePath          String               @db.VarChar(500)
-  fileSize             Int
-  mimeType             String               @db.VarChar(100)
+  id                    Int       @id @default(autoincrement())
+  ticketId              Int
+  filename              String    @db.VarChar(255)
+  storagePath           String    @db.VarChar(500)
+  fileSize              Int
+  mimeType              String    @db.VarChar(100)
   uploadedByRequesterId Int
-  isRemoved            Boolean              @default(false)
-  removedAt            DateTime?
-  removalReason        String?              @db.VarChar(255)
-  createdAt            DateTime             @default(now())
-  ticket               Ticket               @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  uploadedBy           DevelopmentRequester @relation(fields: [uploadedByRequesterId], references: [id])
+  isRemoved             Boolean   @default(false)
+  removedAt             DateTime?
+  removalReason         String?   @db.VarChar(255)
+  createdAt             DateTime  @default(now())
+  ticket                Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploadedBy            User      @relation("UploadedBy", fields: [uploadedByRequesterId], references: [id])
 
   @@index([ticketId, isRemoved])
   @@map("attachments")

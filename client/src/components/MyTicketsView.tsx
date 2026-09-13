@@ -146,9 +146,9 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
     Boolean(selectedStatus);
 
   return (
-    <div className="container py-4">
+    <div className="container-fluid px-3 px-md-4 py-3 py-sm-4" style={{ maxWidth: "1280px" }}>
       {/* Header & Main Action Bar */}
-      <div className="zen-card p-4 mb-4">
+      <div className="zen-card p-3 p-sm-4 mb-4">
         <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
           <div>
             <h1 className="h4 fw-bold mb-1">My Tickets</h1>
@@ -294,39 +294,43 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
           )}
         </div>
       ) : (
-        <div className="zen-card overflow-hidden mb-4">
-          {/* Desktop Data Table (Visible >= 768px) */}
-          <div className="table-responsive d-none d-md-block">
+        <div className="zen-card mb-4">
+          {/* Desktop & Tablet Data Table (Visible >= 768px) */}
+          <div className="table-responsive rounded">
             <table className="table table-hover align-middle mb-0">
               <thead className="table-light small text-muted">
                 <tr>
-                  <th scope="col" style={{ cursor: "pointer" }} onClick={() => { setSortBy("ticketNumber"); setSortOrder(sortOrder === "asc" ? "desc" : "asc"); }}>
+                  <th scope="col" className="text-nowrap" style={{ cursor: "pointer", minWidth: "125px" }} onClick={() => { setSortBy("ticketNumber"); setSortOrder(sortOrder === "asc" ? "desc" : "asc"); }}>
                     Ticket No. {sortBy === "ticketNumber" && (sortOrder === "asc" ? "▲" : "▼")}
                   </th>
-                  <th scope="col" style={{ cursor: "pointer" }} onClick={() => { setSortBy("createdAt"); setSortOrder(sortOrder === "asc" ? "desc" : "asc"); }}>
+                  <th scope="col" className="text-nowrap" style={{ cursor: "pointer", minWidth: "115px" }} onClick={() => { setSortBy("createdAt"); setSortOrder(sortOrder === "asc" ? "desc" : "asc"); }}>
                     Created Date {sortBy === "createdAt" && (sortOrder === "asc" ? "▲" : "▼")}
                   </th>
-                  <th scope="col">Summary</th>
-                  <th scope="col">Category</th>
-                  <th scope="col">Req. Priority</th>
-                  <th scope="col">IT Priority</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">IT Owner</th>
-                  <th scope="col">Last Updated</th>
+                  <th scope="col" style={{ minWidth: "160px", maxWidth: "240px" }}>Summary</th>
+                  <th scope="col" className="text-nowrap" style={{ minWidth: "130px" }}>Category</th>
+                  <th scope="col" className="text-nowrap" style={{ minWidth: "100px" }}>Req. Priority</th>
+                  <th scope="col" className="text-nowrap" style={{ minWidth: "90px" }}>IT Priority</th>
+                  <th scope="col" className="text-nowrap" style={{ minWidth: "85px" }}>Status</th>
+                  <th scope="col" className="text-nowrap" style={{ minWidth: "100px" }}>IT Owner</th>
+                  <th scope="col" className="text-nowrap" style={{ minWidth: "105px" }}>Last Updated</th>
                 </tr>
               </thead>
               <tbody>
                 {tickets.map((t) => (
                   <tr key={t.id} style={{ cursor: onSelectTicket ? "pointer" : "default" }} onClick={() => onSelectTicket && onSelectTicket(t.id)}>
-                    <td className="fw-bold text-success small">{t.ticketNumber}</td>
-                    <td className="small text-muted">{new Date(t.createdAt).toLocaleDateString()}</td>
-                    <td className="small fw-semibold">{t.summary}</td>
-                    <td className="small">{t.category?.name || "N/A"}</td>
-                    <td>{renderPriorityBadge(t.requestedPriority)}</td>
-                    <td>{renderPriorityBadge(t.itPriority)}</td>
-                    <td>{renderStatusBadge(t.status)}</td>
-                    <td className="small text-muted">{t.itOwnerName || "Unassigned"}</td>
-                    <td className="small text-muted">{new Date(t.updatedAt).toLocaleDateString()}</td>
+                    <td className="fw-bold text-success small text-nowrap">{t.ticketNumber}</td>
+                    <td className="small text-muted text-nowrap">{new Date(t.createdAt).toLocaleDateString()}</td>
+                    <td className="small fw-semibold">
+                      <div className="text-truncate" style={{ maxWidth: "240px" }} title={t.summary}>
+                        {t.summary}
+                      </div>
+                    </td>
+                    <td className="small text-nowrap">{t.category?.name || "N/A"}</td>
+                    <td className="text-nowrap">{renderPriorityBadge(t.requestedPriority)}</td>
+                    <td className="text-nowrap">{renderPriorityBadge(t.itPriority)}</td>
+                    <td className="text-nowrap">{renderStatusBadge(t.status)}</td>
+                    <td className="small text-muted text-nowrap">{t.itOwnerName || "Unassigned"}</td>
+                    <td className="small text-muted text-nowrap">{new Date(t.updatedAt).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
