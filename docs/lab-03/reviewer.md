@@ -10,304 +10,347 @@ All review comments and responses below are copied from, or linked directly to, 
 
 ## Pull Requests I authored and my partner reviewed
 
-| PR # | Pull Request | Branch | Reviewer | Verdict |
+| Issue | Pull Request | Branch | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| #37 | [#37 - docs: add Lab 3 specification and test plan](https://github.com/Atip-Infa/toktickit/pull/37) | `feature/lab3-spec` | `@zerotwobook` | Approved and merged |
-| #38 | [#38 - feat: implement Lab 3 database migration and seed data](https://github.com/Atip-Infa/toktickit/pull/38) | `feature/lab3-database` | `@zerotwobook` | Approved and merged |
-| #39 | [#39 - feat: implement Lab 3 authentication and authorization](https://github.com/Atip-Infa/toktickit/pull/39) | `feature/lab3-auth` | `@zerotwobook` | Approved and merged |
-| #40 | [#40 - feat: implement Lab 3 requester regression and ticket updates](https://github.com/Atip-Infa/toktickit/pull/40) | `feature/lab3-requester` | `@zerotwobook` | Approved and merged |
-| #41 | [#41 - feat: implement Lab 3 IT Staff ticket queue UI and API](https://github.com/Atip-Infa/toktickit/pull/41) | `feature/lab3-staff-queue` | `@zerotwobook` | Approved and merged |
-| #42 | [#42 - feat: implement Lab 3 IT Staff ticket detail and workflow](https://github.com/Atip-Infa/toktickit/pull/42) | `feature/lab3-staff-detail` | `@zerotwobook` | Approved and merged |
-| #43 | [#43 - feat: implement Lab 3 administrator user management](https://github.com/Atip-Infa/toktickit/pull/43) | `feature/lab3-admin` | `@zerotwobook` | Approved and merged |
-| #44 | [#44 - feat: complete Lab 3 verification and test suites](https://github.com/Atip-Infa/toktickit/pull/44) | `feature/lab3-testing` | `@zerotwobook` | Approved and merged |
-| #45 | [#45 - docs: complete Lab 3 evidence, reviewer documentation, ai-use disclosure](https://github.com/Atip-Infa/toktickit/pull/45) | `feature/lab3-release` | `@zerotwobook` | Approved and merged |
+| #28 | [#37 - docs: add Lab 3 specification and test plan](https://github.com/Atip-Infa/toktickit/pull/37) | `feature/lab3-spec` | `@zerotwobook` | Approved and merged |
+| #29 | [#38 - feat: implement Lab 3 database migration and seed data](https://github.com/Atip-Infa/toktickit/pull/38) | `feature/lab3-database` | `@zerotwobook` | Approved and merged |
+| #30 | [#39 - feat: implement Lab 3 authentication and authorization](https://github.com/Atip-Infa/toktickit/pull/39) | `feature/lab3-auth` | `@zerotwobook` | Approved and merged |
+| #31 | [#40 - feat: implement Lab 3 requester regression and ticket updates](https://github.com/Atip-Infa/toktickit/pull/40) | `feature/lab3-requester` | `@zerotwobook` | Approved and merged |
+| #32 | [#41 - feat: implement Lab 3 IT Staff ticket queue UI and API](https://github.com/Atip-Infa/toktickit/pull/41) | `feature/lab3-staff-queue` | `@zerotwobook` | Approved and merged |
+| #33 | [#42 - feat: implement Lab 3 IT Staff ticket detail and workflow](https://github.com/Atip-Infa/toktickit/pull/42) | `feature/lab3-staff-detail` | `@zerotwobook` | Approved and merged |
+| #34 | [#43 - feat: implement Lab 3 administrator user management](https://github.com/Atip-Infa/toktickit/pull/43) | `feature/lab3-admin` | `@zerotwobook` | Approved and merged |
+| #35 | [#44 - test: complete Lab 3 testing and responsive evidence](https://github.com/Atip-Infa/toktickit/pull/44) | `feature/lab3-testing` | `@zerotwobook` | Approved and merged |
+| #36 | [#45 - docs: complete Lab 3 evidence, reviewer documentation, ai-use disclosure](https://github.com/Atip-Infa/toktickit/pull/45) | `feature/lab3-release` | `@zerotwobook` | Approved and merged |
 
-### My PR #37 - Lab 3 Specification & Test Plan
+### My PR #37 - Issue #28
 
 His review comment:
 
-> Reviewed Lab 3 Specification & Test Plan in PR #37. I verified the engineering specification, API specification, UI specification, and test traceability plan against the Lab 3 handout requirements. The documents cover multi-role authentication, IT Staff queue workflow, status transition matrix, Internal Notes isolation, Administrator user management rules, responsive viewports, and planned test coverage.
+> Reviewed Issue #28: Lab 3 engineering specification and test plan.
+>
+> The specification covers authentication, role permissions, Requester ownership, IT Staff ticket operations, Public Comments, Internal Notes, ticket status and priority rules, Administrator user management, and preservation of Lab 2 behavior.
+>
+> The API and UI specifications are consistent with the engineering contract, and the test plan provides traceability between requirements and planned tests. Planned tests are clearly distinguished from actual test results.
+>
+> I also verified that this PR is documentation-only and does not claim application tests or feature implementation as complete.
+>
+> No blocking issues found.
+>
+> Approved. Ready to merge into `lab3-staging`.
+
+My response:
+
+> Thank you for reviewing and approving Issue #28.
+>
+> I confirm that the Lab 3 engineering specification and test plan are ready for the implementation phase.
+>
+> The PR is ready to be merged into `lab3-staging`. Issue #29 will begin only after the merge is verified and Issue #28 is marked Done.
+
+My post-merge response:
+
+> Thank you for reviewing and merging the PR. I appreciate the feedback and approval.
+>
+> I confirm that Issue #28 is complete. I'll begin Issue #29, Lab 3 Database Migration & Seed Data, from the updated `lab3-staging` branch.
+>
+> I'll continue following the approved Lab 3 specification and test plan.
+
+[His review](https://github.com/Atip-Infa/toktickit/pull/37#pullrequestreview-5190282302) | [I response](https://github.com/Atip-Infa/toktickit/pull/37#issuecomment-5652394698) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/37#issuecomment-5652401093)
+
+### My PR #38 - Issue #29
+
+His review comment:
+
+> Reviewed Issue #29: Lab 3 Database Migration & Seed Data.
+>
+> The database changes were reviewed against the approved Lab 3 specification. The Prisma schema, migration changes, and seed data were checked for the required Lab 3 roles/users and preservation of existing Lab 2 behavior.
+>
+> Validation results were reviewed and no blocking issues were found.
+>
+> Approved. Ready to merge into `lab3-staging`.
+
+My response:
+
+> Thank you for reviewing and approving Issue #29.
+>
+> I confirm that the database migration and seed implementation is ready to be merged into `lab3-staging`.
+>
+> I will proceed with the next Lab 3 task only after the merge is verified and Issue #29 is marked Done.
+
+My post-merge response:
+
+> Thank you for reviewing and merging the PR. I appreciate the feedback and approval.
+>
+> I confirm that Issue #29 is complete. I’ll begin Issue #30, Lab 3 Authentication & Authorization, from the updated `lab3-staging` branch and continue following the approved Lab 3 specification and test plan.
+
+[His review](https://github.com/Atip-Infa/toktickit/pull/38#pullrequestreview-5190594206) | [I response](https://github.com/Atip-Infa/toktickit/pull/38#issuecomment-5653081955) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/38#issuecomment-5653085159)
+
+### My PR #39 - Issue #30
+
+His review comment:
+
+> Reviewed Issue #30: Lab 3 Authentication & Server Authorization.
+>
+> Verified authentication and authorization implementation against approved specification. Checked login, logout, password change, JWT session handling, active user validation, and strict server-side role and ownership guards.
+>
+> Approved. Ready to merge into `lab3-staging`.
+
+My response:
+
+> Thank you for reviewing and approving Issue #30.
+>
+> I confirm that the authentication and authorization implementation is ready to be merged into `lab3-staging`.
+>
+> I will proceed with the next Lab 3 task only after the merge is verified and Issue #30 is marked Done.
+
+My post-merge response:
+
+> Thank you for reviewing and merging the PR.
+>
+> I confirm that Issue #30 is complete. I’ll begin Issue #31, Lab 3 Requester Regression & Ticket Updates, from the updated `lab3-staging` branch and continue following the approved Lab 3 specification and test plan.
+
+[His review](https://github.com/Atip-Infa/toktickit/pull/39#pullrequestreview-5190661668) | [I response](https://github.com/Atip-Infa/toktickit/pull/39#issuecomment-5653250896) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/39#issuecomment-5653256112)
+
+### My PR #40 - Issue #31
+
+His review comment:
+
+> Reviewed Issue #31: Lab 3 Requester Regression & Ticket Updates.
+>
+> The Requester workflow was reviewed against the approved Lab 3 specification.
+>
+> Requester ticket ownership, ticket viewing and update behavior, validation, authorization, attachment functionality, and preservation of required Lab 2 behavior were checked.
+>
+> The validation results were reviewed, and no blocking issues were found.
+>
+> Approved. Ready to merge into `lab3-staging`.
+
+[His review](https://github.com/Atip-Infa/toktickit/pull/40#pullrequestreview-5190768091)
+
+### My PR #41 - Issue #32
+
+His review comment:
+
+> I reviewed the Prisma schema, migration, and seed data for Lab 3.
+>
+> The database changes support the required user roles, active/inactive accounts, ticket ownership, IT Priority, Public Comments, and Internal Notes.
+>
+> I also checked that the existing Lab 2 Ticket and Attachment structures are preserved.
+>
+> The seed data includes the required Requester, IT Staff, Administrator, ticket, comment, and note records.
+>
+> The implementation looks consistent with the Lab 3 requirements.
 >
 > Approved.
 
-My response:
+[His review](https://github.com/Atip-Infa/toktickit/pull/41#pullrequestreview-5190861859)
 
-> Thank you for reviewing PR #37 and confirming that the four Lab 3 specification documents meet all requirements. I appreciate your feedback and approval. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #37. I really appreciate your time and feedback. Thank you for merging the PR into lab3-staging. PR #37 is now complete, and I will proceed with the database migration task.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/37#pullrequestreview-5010000001) | [I response](https://github.com/Atip-Infa/toktickit/pull/37#issuecomment-5390000001) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/37#issuecomment-5390000002)
-
-### My PR #38 - Lab 3 Database Migration & Seed Data
+### My PR #42 - Issue #33
 
 His review comment:
 
-> Reviewed Lab 3 Database Migration & Seed Data in PR #38. I verified the Prisma schema evolution including User model, PublicComment model, InternalNote model, extended TicketStatus enum, and IT Priority relationships. I confirmed that the seed script populates 9 standard users across all three roles and preserves existing Lab 2 ticket/attachment data without loss.
+> Reviewed Issue #33: Lab 3 IT Staff Ticket Detail & Workflow.
 >
-> Approved.
+> The IT Staff ticket detail implementation was reviewed against the approved Lab 3 specification.
+>
+> Ticket status and priority workflow, IT Staff update permissions, Public Comments, Internal Notes, validation, error handling, and preservation of required Lab 2 functionality were checked.
+>
+> The relevant test results were reviewed, and no blocking issues were found.
+>
+> Approved. Ready to merge into `lab3-staging`.
 
-My response:
+[His review](https://github.com/Atip-Infa/toktickit/pull/42#pullrequestreview-5190923859)
 
-> Thank you for reviewing PR #38 and confirming the database schema evolution and seed data. I appreciate your feedback and approval. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #38. Thank you for merging the PR into lab3-staging. PR #38 is now complete, and I will proceed with authentication and authorization middleware.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/38#pullrequestreview-5010000002) | [I response](https://github.com/Atip-Infa/toktickit/pull/38#issuecomment-5390000003) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/38#issuecomment-5390000004)
-
-### My PR #39 - Lab 3 Authentication & Authorization Middleware
+### My PR #43 - Issue #34
 
 His review comment:
 
-> Reviewed Lab 3 Authentication & Authorization in PR #39. I verified the JWT authentication endpoints (/api/auth/login, /api/auth/me, /api/auth/logout, /api/auth/change-password), bcrypt password hashing, mandatory first-login password reset logic, and strict server-side role and ownership guards. I verified client identity spoofing protection ensures identity is derived strictly from server sessions.
+> Reviewed Issue #34: Lab 3 Administrator User Management.
 >
-> Approved.
+> The Administrator user management implementation was reviewed against the approved Lab 3 specification.
+>
+> I checked:
+>
+> Administrator-only authorization
+> User management functionality
+> Role management
+> Validation and error handling
+> Administrator UI behavior
+> Preservation of existing Requester and IT Staff functionality
+> Relevant test results
+>
+> No blocking issues were found.
+>
+> Approved. Ready to merge into `lab3-staging`.
 
-My response:
+[His review](https://github.com/Atip-Infa/toktickit/pull/43#pullrequestreview-5190963616)
 
-> Thank you for reviewing PR #39 and verifying the server-side authentication and role authorization rules. I appreciate your feedback and approval. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #39. Thank you for merging the PR into lab3-staging. PR #39 is now complete, and I will proceed with Requester updates.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/39#pullrequestreview-5010000003) | [I response](https://github.com/Atip-Infa/toktickit/pull/39#issuecomment-5390000005) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/39#issuecomment-5390000006)
-
-### My PR #40 - Lab 3 Requester Regression & Ticket Updates
+### My PR #44 - Issue #35
 
 His review comment:
 
-> Reviewed Lab 3 Requester updates in PR #40. I verified that Requester ticket creation, viewing, and attachment features operate cleanly with authenticated session identity. Confirmed Public Comments integration, "Problem Appears Resolved" trigger, and verified zero regressions on Lab 2 test suites.
+> Reviewed Issue #35: Lab 3 Testing, E2E & Responsive UI Evidence.
 >
-> Approved.
+> Verified test execution results across server API integration tests, client component tests, and Playwright E2E suites. Traceability between requirements and test results confirmed.
+>
+> Approved. Ready to merge into `lab3-staging`.
 
-My response:
+[His review](https://github.com/Atip-Infa/toktickit/pull/44#pullrequestreview-5190986699)
 
-> Thank you for reviewing PR #40 and confirming Requester feature updates and regression compatibility. I appreciate your feedback and approval. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #40. Thank you for merging the PR into lab3-staging. PR #40 is now complete, and I will proceed with the IT Staff Queue UI.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/40#pullrequestreview-5010000004) | [I response](https://github.com/Atip-Infa/toktickit/pull/40#issuecomment-5390000007) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/40#issuecomment-5390000008)
-
-### My PR #41 - Lab 3 IT Staff Ticket Queue UI & API
+### My PR #45 - Issue #36
 
 His review comment:
 
-> Reviewed IT Staff Ticket Queue in PR #41. I verified queue table rendering (Ticket #, Created Date, Summary, Category, Requested Priority, IT Priority, Status, Ticket Owner, Last Updated), real-time search, status/category/priority/owner filters, sorting, pagination, and Zen Green responsive styling across viewports.
+> Reviewed Issue #36: Lab 3 Integration, Review & Final Submission.
 >
-> Approved.
-
-My response:
-
-> Thank you for reviewing PR #41 and verifying the IT Staff Queue interface and search/filter capabilities. I appreciate your feedback and approval. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #41. Thank you for merging the PR into lab3-staging. PR #41 is now complete, and I will proceed with IT Staff Ticket Detail and workflow controls.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/41#pullrequestreview-5010000005) | [I response](https://github.com/Atip-Infa/toktickit/pull/41#issuecomment-5390000009) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/41#issuecomment-5390000010)
-
-### My PR #42 - Lab 3 IT Staff Ticket Detail & Workflow
-
-His review comment:
-
-> Reviewed IT Staff Ticket Detail in PR #42. I verified ticket claiming, reassigning, IT Priority modification, and exact status transition matrix validation. Verified mandatory resolution summary enforcement on RESOLVED/CLOSED transitions, Public Comments rendering, and strict server-side Internal Notes isolation (403 Forbidden for Requesters).
+> I reviewed the integrated Lab 3 implementation against the approved specification and reviewed the completed testing and evidence.
 >
-> Approved.
-
-My response:
-
-> Thank you for reviewing PR #42 and verifying the ticket workflow controls, status transition matrix, and Internal Notes isolation. I appreciate your feedback and approval. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #42. Thank you for merging the PR into lab3-staging. PR #42 is now complete, and I will proceed with Administrator User Management.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/42#pullrequestreview-5010000006) | [I response](https://github.com/Atip-Infa/toktickit/pull/42#issuecomment-5390000011) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/42#issuecomment-5390000012)
-
-### My PR #43 - Lab 3 Administrator User Management
-
-His review comment:
-
-> Reviewed Administrator User Management in PR #43. I verified user list display (Name, Email, Role, Status, Edit), search/role filters, user creation modal with mandatory first-login password change (mustChangePassword: true), user editing, active status toggle, initial password reset, and backend safety guards preventing admin self-deactivation and last admin deactivation.
+> I verified the major Lab 3 functionality, including authentication and authorization, Requester functionality, IT Staff ticketing, Administrator user management, comments/notes, validation, responsive behavior, and preservation of required Lab 2 functionality.
 >
-> Approved.
-
-My response:
-
-> Thank you for reviewing PR #43 and verifying Administrator User Management and safety protection guards. I appreciate your feedback and approval. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #43. Thank you for merging the PR into lab3-staging. PR #43 is now complete, and I will proceed with full system verification.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/43#pullrequestreview-5010000007) | [I response](https://github.com/Atip-Infa/toktickit/pull/43#issuecomment-5390000013) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/43#issuecomment-5390000014)
-
-### My PR #44 - Lab 3 Full System Verification & Test Suites
-
-His review comment:
-
-> Reviewed Lab 3 Full System Verification in PR #44. I verified 13 server test files (65 tests), 12 client component test files (31 tests), and Playwright E2E suites (10 tests). Confirmed 100% test pass rate (106/106 tests PASS) with zero regressions on Lab 1 and Lab 2 features.
+> No blocking issues were found.
 >
-> Approved.
+> Approved. The Lab 3 implementation is ready for final release/submission.
 
-My response:
-
-> Thank you for reviewing PR #44 and verifying our 100% test pass rate across unit, integration, and Playwright E2E suites. I appreciate your feedback and approval. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #44. Thank you for merging the PR into lab3-staging. PR #44 is now complete, and I will proceed with release evidence documentation.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/44#pullrequestreview-5010000008) | [I response](https://github.com/Atip-Infa/toktickit/pull/44#issuecomment-5390000015) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/44#issuecomment-5390000016)
-
-### My PR #45 - Lab 3 Release Evidence & Documentation
-
-His review comment:
-
-> Reviewed Lab 3 Release Evidence & Documentation in PR #45. I verified reviewer documentation, AI-use disclosure with 8 prompts logged, organized multi-viewport screenshot artifacts under artifacts/lab-03/screenshots/, and verified repository readiness for main branch release.
->
-> Approved. Ready to merge into lab3-staging.
-
-My response:
-
-> Thank you for reviewing PR #45 and confirming the quality evidence, reviewer documentation, and screenshot artifacts. I appreciate your time and feedback. You can proceed with merging this PR into lab3-staging.
-
-My post-merge response:
-
-> Thank you for reviewing and approving PR #45. Thank you for merging the PR into lab3-staging. All Lab 3 feature PRs are complete.
-
-[His review](https://github.com/Atip-Infa/toktickit/pull/45#pullrequestreview-5010000009) | [I response](https://github.com/Atip-Infa/toktickit/pull/45#issuecomment-5390000017) | [I post-merge response](https://github.com/Atip-Infa/toktickit/pull/45#issuecomment-5390000018)
+[His review](https://github.com/Atip-Infa/toktickit/pull/45#pullrequestreview-5191017114)
 
 ---
 
 ## Pull Requests I reviewed for my partner
 
-| PR # | Pull Request | Branch | Reviewer | Verdict |
+| Issue | Pull Request | Branch | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| #37 | [#37 - Lab 3 engineering contract and test plan](https://github.com/BOOky-OS/toktickit/pull/37) | `feature/lab3-contract` | `@Atip-Infa` | Approved and merged |
-| #38 | [#38 - Database schema evolution and seed data](https://github.com/BOOky-OS/toktickit/pull/38) | `feature/lab3-database` | `@Atip-Infa` | Approved and merged |
-| #39 | [#39 - Authentication and server authorization APIs](https://github.com/BOOky-OS/toktickit/pull/39) | `feature/lab3-auth-api` | `@Atip-Infa` | Approved and merged |
-| #40 | [#40 - Requester auth integration and public comments](https://github.com/BOOky-OS/toktickit/pull/40) | `feature/lab3-requester-ui` | `@Atip-Infa` | Approved and merged |
-| #41 | [#41 - IT Staff ticket queue UI and search/filters](https://github.com/BOOky-OS/toktickit/pull/41) | `feature/lab3-staff-queue` | `@Atip-Infa` | Approved and merged |
-| #42 | [#42 - IT Staff ticket detail, workflow and internal notes](https://github.com/BOOky-OS/toktickit/pull/42) | `feature/lab3-staff-detail` | `@Atip-Infa` | Approved and merged |
-| #43 | [#43 - Administrator user management and safety rules](https://github.com/BOOky-OS/toktickit/pull/43) | `feature/lab3-admin-ui` | `@Atip-Infa` | Approved and merged |
-| #44 | [#44 - Lab 3 full test verification and E2E suites](https://github.com/BOOky-OS/toktickit/pull/44) | `feature/lab3-verification` | `@Atip-Infa` | Approved and merged |
-| #45 | [#45 - Lab 3 documentation and release integration](https://github.com/BOOky-OS/toktickit/pull/45) | `feature/lab3-release-docs` | `@Atip-Infa` | Approved and merged |
+| #32 | [#42 - Lab 3: Define the engineering contract and test plan](https://github.com/BOOky-OS/toktickit/pull/42) | `feature/32-spec-test-plan` | `@Atip-Infa` | Approved and merged |
+| #33 | [#43 - Issue #33: migrate users and preserve data with guarded local seed](https://github.com/BOOky-OS/toktickit/pull/43) | `feature/33-database-seed` | `@Atip-Infa` | Approved and merged |
+| #34 | [#44 - Issue #34: authenticate sessions and enforce backend authorization](https://github.com/BOOky-OS/toktickit/pull/44) | `feature/34-auth-authorization` | `@Atip-Infa` | Approved and merged |
+| #35 | [#45 - Lab 3: add authentication UI and role-aware shell](https://github.com/BOOky-OS/toktickit/pull/45) | `feature/35-auth-ui` | `@Atip-Infa` | Approved and merged |
+| #36 | [#46 - Preserve authenticated Requester workflows for Lab 3](https://github.com/BOOky-OS/toktickit/pull/46) | `feature/36-requester-workflows` | `@Atip-Infa` | Approved and merged |
+| #37 | [#47 - Lab 3: Implement responsive Staff Ticket Queue (#37)](https://github.com/BOOky-OS/toktickit/pull/47) | `feature/37-staff-ticket-queue` | `@Atip-Infa` | Approved and merged |
+| #38 | [#48 - Lab 3: Implement staff ownership, priority and status transitions (#38)](https://github.com/BOOky-OS/toktickit/pull/48) | `feature/38-staff-ticket-detail` | `@Atip-Infa` | Approved and merged |
+| #39 | [#49 - Lab 3: Add Public Comments, Internal Notes and resolution indication (#39)](https://github.com/BOOky-OS/toktickit/pull/49) | `feature/39-comments-notes` | `@Atip-Infa` | Approved and merged |
+| #40 | [#50 - Lab 3: Implement Administrator User Management (#40)](https://github.com/BOOky-OS/toktickit/pull/50) | `feature/40-admin-user-management` | `@Atip-Infa` | Approved and merged |
+| #41 | [#51 - Lab 3: Complete verification, evidence, and responsive UI (#41)](https://github.com/BOOky-OS/toktickit/pull/51) | `feature/41-verification-release` | `@Atip-Infa` | Approved and merged |
+| #41 | [#52 - docs: synchronize Lab 3 review and pre-release evidence (#41)](https://github.com/BOOky-OS/toktickit/pull/52) | `docs/41-final-reflection-evidence` | `@Atip-Infa` | Approved and merged |
+| #41 | [#53 - docs: record latest review and release authorization (#41)](https://github.com/BOOky-OS/toktickit/pull/53) | `docs/41-release-review-record` | `@Atip-Infa` | Approved and merged |
 
 ---
 
 ## Comments I submitted on my partner's Pull Requests
 
-### PR #37 - Lab 3 Specification & Test Plan
+### PR #42 - Issue #32
 
 I comment:
 
-> Reviewed Issue #37: Lab 3 engineering contract and test plan.
->
-> Verified specification, user stories, backend data model design, 8-state ticket status matrix, server authorization matrix, password rules, user management safety constraints, multi-viewport UI specifications, and test plan traceability.
->
+> Reviewed Issue #32: Lab 3 engineering contract and test plan.The specification covers authentication, role permissions, staff ticket operations, comments/internal notes, and minimal user management. Admin manages users and has read-only Ticket access; IT Staff performs Ticket updates.The API/UI specifications and planned tests align with the contract, including migration safety and preservation of Lab 2 behavior. The test plan distinguishes planned coverage from actual passing results.The workflow requires completed documentation and explicit student confirmation before release to main.
 > Approved. Ready to merge into lab3-staging.
 
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/37#pullrequestreview-5008000001)
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/42#pullrequestreview-5168577727)
 
-### PR #38 - Database Schema & Seed Data
+### PR #43 - Issue #33
 
 I comment:
 
-> Reviewed Issue #38: Database migration and seed data.
->
-> Verified User, PublicComment, InternalNote models, extended TicketStatus enum, and 9 seeded users across all three roles. Lab 2 ticket/attachment data remains completely intact.
->
+> Reviewed Issue #33, including the User migration, guarded seed/provisioning, recorded test results, and workflow documentation.
+> The migration preserves existing data, and the seed/provisioning safeguards protect existing user changes and passwords.
+> Approved for merging into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/43#pullrequestreview-5175753084)
+
+### PR #44 - Issue #34
+
+I comment:
+
+> Reviewed Issue #34, including session authentication, password changes, CSRF protection, backend role and ownership checks, and the recorded test results.
+> The implementation and documentation meet the scope of this increment. Browser authentication and the remaining workflows are tracked in later issues.
+> Approved for merging into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/44#pullrequestreview-5175986095)
+
+### PR #45 - Issue #35
+
+I comment:
+
+> Reviewed Issue #35, including the Login and Change Password flows, mandatory first-password change, session restoration, role-specific navigation, logout and expiry behavior, and the removal of the development requester selector.
+> The client now uses the authenticated server session for requester ownership, keeps CSRF only in memory, and does not send requesterId from the browser. I also reviewed the recorded client 48/48 and server 100/100 test results, builds, Prisma validation, and updated documentation.
+> The implementation and documentation meet the scope of this increment. Real browser E2E and final screenshots remain correctly tracked for the later isolated E2E and final-evidence work.
+> Approved for merging into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/45#pullrequestreview-5180204380)
+
+### PR #46 - Issue #36
+
+I comment:
+
+> Reviewed PR #46 at commit fdff03a against Issue #36.
+> I checked the authenticated Requester ownership boundaries, stable submission-key behavior, all eight Ticket statuses, Ticket Detail metadata, Attachment row locking/version increments, removal audit data, safe download headers, and partial-upload retry flow. I also reviewed the recorded server, client, build, and Prisma validation results.
+> No blocking issues found. Approved for merge into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/46#pullrequestreview-5185338624)
+
+### PR #47 - Issue #37
+
+I comment:
+
+> Reviewed PR #47 at commit a5b100b against the acceptance criteria for Issue #37.
+> The Queue implementation covers Staff/Admin access, query validation, filtering, sorting, stable pagination, responsive layouts, and read-only Ticket Detail navigation. I also reviewed the documented test results and their limitations.
+> No blocking issues found within this PR's scope. Approved for merging into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/47#pullrequestreview-5185541205)
+
+### PR #48 - Issue #38
+
+I comment:
+
+> Reviewed PR #48 at commit dc48634 against Issue #38.
+> Checked Staff permissions, ownership and priority rules, the status transition matrix, version handling, public history, and confirmation/conflict behavior. Reviewed the recorded test results and their stated limitations.
+> No blocking issues found within this PR's scope. Approved for merging into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/48#pullrequestreview-5185613150)
+
+### PR #49 - Issue #39
+
+I comment:
+
+> Reviewed PR #49 at commit 658535f against Issue #39.
+> Checked Public Comments and Internal Notes permissions, requester privacy, append-only behavior, content validation, resolution indication, and separate draft/retry handling. Reviewed the documented test results and their limitations.
+> No blocking issues found within this PR's scope. Approved for merging into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/49#pullrequestreview-5186228933)
+
+### PR #50 - Issue #40
+
+I comment:
+
+> Reviewed PR #50 at commit cf788ca against Issue #40.
+> Checked Admin access, user validation, initial-password handling, session revocation, last-Admin and active-owner protection, and create/edit/reset behavior. Reviewed the documented test results and their limitations.
+> No blocking issues found within this PR's scope. Approved for merging into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/50#pullrequestreview-5186273018)
+
+### PR #51 - Issue #41
+
+I comment:
+
+> I reviewed the final head at commit e0a9c75.
+> The Lab 3 documentation, test traceability, responsive UI updates, and evidence PDF are consistent with the required scope. I checked the Login, Requester, IT Staff, and Administrator workflows, including the Staff Queue, Ticket Detail, User Management, role-specific controls, responsive layouts, and accessibility evidence.
+> Approved. The implementation and pre-release evidence are ready to merge into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/51#pullrequestreview-5191031280)
+
+### PR #52 - Issue #41
+
+I comment:
+
+> I reviewed PR #52 at commit 75d65ff.
+> I checked the updated reviewer record, AI-use wording, workflow status, and pre-release PDF. The reciprocal reviews include the review comments, partner responses, and evidence links.
+> Approved for merging into lab3-staging.
+
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/52#pullrequestreview-5193556640)
+
+### PR #53 - Issue #41
+
+I comment:
+
+> Reviewed the latest review record and release authorization in PR #53.
+> Verified the reciprocal reviews, evidence links, updated PDF, and release readiness.
 > Approved. Ready to merge into lab3-staging.
 
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/38#pullrequestreview-5008000002)
-
-### PR #39 - Authentication & Authorization APIs
-
-I comment:
-
-> Reviewed Issue #39: Authentication and Server Authorization.
->
-> Verified JWT login, bcrypt hashing, mandatory password reset flag handling, active user validation, and strict server-side role and resource ownership guards. Anti-identity spoofing logic overrides client requesterId with req.user.id.
->
-> Approved. Ready to merge into lab3-staging.
-
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/39#pullrequestreview-5008000003)
-
-### PR #40 - Requester Integration & Public Comments
-
-I comment:
-
-> Reviewed Issue #40: Requester auth integration and Public Comments.
->
-> Verified requester session binding, public comments feed/composer, problem resolution trigger, and verified zero regressions on Lab 2 automated test suites.
->
-> Approved. Ready to merge into lab3-staging.
-
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/40#pullrequestreview-5008000004)
-
-### PR #41 - IT Staff Ticket Queue UI
-
-I comment:
-
-> Reviewed Issue #41: IT Staff Ticket Queue.
->
-> Verified queue table layout, summary/number search, status/category/priority/owner filters, sorting, server pagination, status/priority badges, and responsive viewports.
->
-> Approved. Ready to merge into lab3-staging.
-
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/41#pullrequestreview-5008000005)
-
-### PR #42 - IT Staff Ticket Detail & Workflow
-
-I comment:
-
-> Reviewed Issue #42: IT Staff Ticket Detail & Workflow.
->
-> Verified ticket claiming, reassigning, IT Priority updates, status transition matrix validation, resolution summary enforcement on RESOLVED/CLOSED, Public Comments, and strict server-side Internal Notes isolation (403 for Requesters).
->
-> Approved. Ready to merge into lab3-staging.
-
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/42#pullrequestreview-5008000006)
-
-### PR #43 - Administrator User Management
-
-I comment:
-
-> Reviewed Issue #43: Administrator User Management.
->
-> Verified user list display, search/role filters, user creation modal with mustChangePassword flag, edit user controls, active toggle, initial password reset, duplicate email rejection, admin self-deactivation protection, and last active admin protection.
->
-> Approved. Ready to merge into lab3-staging.
-
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/43#pullrequestreview-5008000007)
-
-### PR #44 - Lab 3 Full Verification
-
-I comment:
-
-> Reviewed Issue #44: Full test verification.
->
-> Verified 106 automated tests passing 100% across server integration API tests, client component tests, and Playwright E2E tests across Desktop, Tablet, and Mobile viewports.
->
-> Approved. Ready to merge into lab3-staging.
-
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/44#pullrequestreview-5008000008)
-
-### PR #45 - Lab 3 Documentation & Release Integration
-
-I comment:
-
-> Reviewed complete Lab 3 release integration and documentation in PR #45.
->
-> Verified reviewer documentation, AI usage disclosure, prompt logs, and organized screenshot artifacts. All Lab 3 requirements are satisfied and ready for release.
->
-> Approved. Ready to merge into lab3-staging and main.
-
-[My evidence](https://github.com/BOOky-OS/toktickit/pull/45#pullrequestreview-5008000009)
+[My evidence](https://github.com/BOOky-OS/toktickit/pull/53#pullrequestreview-5193560000)
