@@ -1,17 +1,33 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import path from "path";
 import fs from "fs";
 import multer from "multer";
 import { getPrisma } from "./prisma.js";
 import { generateTicketNumber } from "./utils/ticketNumber.js";
+import {
+  authenticateUser,
+  requireAuth,
+  requirePasswordChanged,
+  requireRole,
+} from "./middleware/auth.js";
+import {
+  comparePassword,
+  hashPassword,
+  validatePasswordStrength,
+  generateToken,
+  invalidateToken,
+} from "./utils/auth.js";
 
 export const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+app.use(authenticateUser);
 
-// Setup Multer Storage for Lab 2 file uploads
+// Setup Multer Storage for file uploads
 const uploadDir = path.join(process.cwd(), "uploads", "lab-02");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -52,6 +68,118 @@ app.get("/api/health", (_req: Request, res: Response) => {
   res.status(200).json({ status: "ok", service: "TokTickIT API" });
 });
 
+// ---------------------------------------------------------------------------
+// Authentication APIs (Lab 3)
+// ---------------------------------------------------------------------------
+
+// POST /api/auth/login
+app.post("/api/auth/login", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password || typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).json({ error: "Email and password are required", code: "INVALID_INPUT" });
+    }
+
+    const prisma = getPrisma();
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email.trim(), mode: "insensitive" } },
+    });
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({ error: "Invalid credentials or inactive account", code: "INVALID_CREDENTIALS" });
+    }
+
+    const isMatch = comparePassword(password, user.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid credentials or inactive account", code: "INVALID_CREDENTIALS" });
+    }
+
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    res.cookie("toktickit_session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    const { passwordHash: _, ...safeUser } = user;
+    return res.status(200).json({ token, user: safeUser });
+  } catch (err) {
+    return res.status(500).json({ error: "Authentication failed", code: "SERVER_ERROR" });
+  }
+});
+
+// POST /api/auth/logout
+app.post("/api/auth/logout", requireAuth, (req: Request, res: Response) => {
+  if (req.token) {
+    invalidateToken(req.token);
+  }
+  res.clearCookie("toktickit_session");
+  return res.status(200).json({ message: "Logged out successfully" });
+});
+
+// GET /api/auth/me
+app.get("/api/auth/me", requireAuth, (req: Request, res: Response) => {
+  return res.status(200).json({ user: req.user });
+});
+
+// POST /api/auth/change-password
+app.post("/api/auth/change-password", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: "All password fields are required", code: "INVALID_INPUT" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: "New password and confirmation do not match", code: "PASSWORD_MISMATCH" });
+    }
+
+    const validation = validatePasswordStrength(newPassword);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.message, code: "WEAK_PASSWORD" });
+    }
+
+    const prisma = getPrisma();
+    const dbUser = await prisma.user.findUnique({ where: { id: req.user!.id } });
+    if (!dbUser) {
+      return res.status(401).json({ error: "User not found", code: "UNAUTHENTICATED" });
+    }
+
+    const isMatch = comparePassword(currentPassword, dbUser.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Current password is incorrect", code: "INVALID_CURRENT_PASSWORD" });
+    }
+
+    const newHash = hashPassword(newPassword);
+    const updated = await prisma.user.update({
+      where: { id: dbUser.id },
+      data: {
+        passwordHash: newHash,
+        mustChangePassword: false,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        mustChangePassword: true,
+        isActive: true,
+        department: true,
+      },
+    });
+
+    return res.status(200).json({ message: "Password updated successfully", user: updated });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to change password", code: "SERVER_ERROR" });
+  }
+});
+
 // GET /api/categories - Returns active categories
 app.get("/api/categories", async (_req: Request, res: Response) => {
   try {
@@ -66,7 +194,7 @@ app.get("/api/categories", async (_req: Request, res: Response) => {
   }
 });
 
-// GET /api/requesters - Returns active Development Requesters (BR-04, AC-13)
+// GET /api/requesters - Returns active Development Requesters (Lab 2 compatibility)
 app.get("/api/requesters", async (_req: Request, res: Response) => {
   try {
     const requesters = await getPrisma().developmentRequester.findMany({
@@ -105,10 +233,14 @@ app.get("/api/related-systems", async (_req: Request, res: Response) => {
   }
 });
 
-// GET /api/tickets - Query paginated tickets for selected Requester (Issue #16, BR-06, BR-19, BR-20, BR-21, AC-10)
+// GET /api/tickets - Query paginated tickets
 app.get("/api/tickets", async (req: Request, res: Response) => {
   try {
-    const requesterId = Number(req.query.requesterId || req.headers["x-requester-id"]);
+    if (req.user && req.user.mustChangePassword) {
+      return res.status(403).json({ error: "Mandatory password change required", code: "MUST_CHANGE_PASSWORD" });
+    }
+
+    const requesterId = req.user ? req.user.id : Number(req.query.requesterId || req.headers["x-requester-id"]);
     if (!requesterId || isNaN(requesterId)) {
       return res.status(400).json({ error: "requesterId is required" });
     }
@@ -173,11 +305,15 @@ app.get("/api/tickets", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/tickets/:id - Get Ticket Detail for owned ticket (Issue #17, BR-06, AC-02, AC-03)
+// GET /api/tickets/:id - Get Ticket Detail
 app.get("/api/tickets/:id", async (req: Request, res: Response) => {
   try {
+    if (req.user && req.user.mustChangePassword) {
+      return res.status(403).json({ error: "Mandatory password change required", code: "MUST_CHANGE_PASSWORD" });
+    }
+
     const ticketId = Number(req.params.id);
-    const requesterId = Number(req.query.requesterId || req.headers["x-requester-id"]);
+    const requesterId = req.user ? req.user.id : Number(req.query.requesterId || req.headers["x-requester-id"]);
 
     if (!ticketId || isNaN(ticketId)) {
       return res.status(400).json({ error: "Invalid ticket ID" });
@@ -192,6 +328,7 @@ app.get("/api/tickets/:id", async (req: Request, res: Response) => {
       where: { id: ticketId },
       include: {
         requester: { select: { id: true, name: true, email: true, department: true } },
+        owner: { select: { id: true, name: true, email: true } },
         category: { select: { id: true, name: true, code: true } },
         relatedSystem: { select: { id: true, name: true, code: true } },
         attachments: {
@@ -216,9 +353,15 @@ app.get("/api/tickets/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Ticket not found" });
     }
 
-    // Ownership check (BR-06, AC-03)
-    if (ticket.requesterId !== requesterId) {
-      return res.status(403).json({ error: "Access denied to ticket" });
+    // Server-side Authorization Check (BR-06, BR-07, AC-04)
+    if (req.user) {
+      if (req.user.role === "REQUESTER" && ticket.requesterId !== req.user.id) {
+        return res.status(403).json({ error: "Access denied to ticket", code: "FORBIDDEN" });
+      }
+    } else {
+      if (ticket.requesterId !== requesterId) {
+        return res.status(403).json({ error: "Access denied to ticket" });
+      }
     }
 
     return res.status(200).json({ data: ticket });
@@ -227,10 +370,14 @@ app.get("/api/tickets/:id", async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/tickets - Create a new ticket (Issue #13)
+// POST /api/tickets - Create a new ticket
 app.post("/api/tickets", async (req: Request, res: Response) => {
   try {
-    const requesterId = Number(req.body.requesterId || req.headers["x-requester-id"]);
+    if (req.user && req.user.mustChangePassword) {
+      return res.status(403).json({ error: "Mandatory password change required", code: "MUST_CHANGE_PASSWORD" });
+    }
+
+    const requesterId = req.user ? req.user.id : Number(req.body.requesterId || req.headers["x-requester-id"]);
     const categoryId = Number(req.body.categoryId);
     const relatedSystemId = Number(req.body.relatedSystemId);
     const requestedPriority = req.body.requestedPriority || "MEDIUM";
@@ -261,14 +408,6 @@ app.post("/api/tickets", async (req: Request, res: Response) => {
     }
 
     const prisma = getPrisma();
-    const requester = await prisma.developmentRequester.findFirst({
-      where: { id: requesterId, isActive: true },
-    });
-    if (!requester) {
-      return res
-        .status(422)
-        .json({ error: "Invalid or inactive Development Requester" });
-    }
 
     const category = await prisma.category.findFirst({
       where: { id: categoryId, isActive: true },
@@ -317,15 +456,11 @@ app.post("/api/tickets", async (req: Request, res: Response) => {
   }
 });
 
-// ---------------------------------------------------------------------------
-// Issue #14 — Attachment Lifecycle APIs
-// ---------------------------------------------------------------------------
-
 // POST /api/tickets/:id/attachments - Upload attachment
 app.post("/api/tickets/:id/attachments", handleMulterUpload, async (req: Request, res: Response) => {
   const file = req.file;
   const ticketId = Number(req.params.id);
-  const requesterId = Number(req.body.requesterId || req.headers["x-requester-id"]);
+  const requesterId = req.user ? req.user.id : Number(req.body.requesterId || req.headers["x-requester-id"]);
 
   const removeTempFile = () => {
     if (file && fs.existsSync(file.path)) {
@@ -338,6 +473,15 @@ app.post("/api/tickets/:id/attachments", handleMulterUpload, async (req: Request
   };
 
   try {
+    if (req.user && req.user.mustChangePassword) {
+      removeTempFile();
+      return res.status(403).json({ error: "Mandatory password change required", code: "MUST_CHANGE_PASSWORD" });
+    }
+
+    if (!file) {
+      return res.status(400).json({ error: "Attachment file is required" });
+    }
+
     if (!ticketId || isNaN(ticketId)) {
       removeTempFile();
       return res.status(400).json({ error: "Invalid ticket ID" });
@@ -349,20 +493,25 @@ app.post("/api/tickets/:id/attachments", handleMulterUpload, async (req: Request
     }
 
     const prisma = getPrisma();
-    const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: ticketId },
+    });
+
     if (!ticket) {
       removeTempFile();
       return res.status(404).json({ error: "Ticket not found" });
     }
 
-    // Ownership check (BR-06, AC-03)
-    if (ticket.requesterId !== requesterId) {
-      removeTempFile();
-      return res.status(403).json({ error: "Access denied to ticket attachments" });
-    }
-
-    if (!file) {
-      return res.status(400).json({ error: "Attachment file is required" });
+    if (req.user) {
+      if (req.user.role === "REQUESTER" && ticket.requesterId !== req.user.id) {
+        removeTempFile();
+        return res.status(403).json({ error: "Access denied to ticket attachments" });
+      }
+    } else {
+      if (ticket.requesterId !== requesterId) {
+        removeTempFile();
+        return res.status(403).json({ error: "Access denied to ticket attachments" });
+      }
     }
 
     // File type & MIME validation (BR-12, AC-05)
@@ -389,7 +538,6 @@ app.post("/api/tickets/:id/attachments", handleMulterUpload, async (req: Request
       });
     }
 
-    // Create attachment record
     const attachment = await prisma.attachment.create({
       data: {
         ticketId,
@@ -403,7 +551,7 @@ app.post("/api/tickets/:id/attachments", handleMulterUpload, async (req: Request
     });
 
     return res.status(201).json({ data: attachment });
-  } catch (err: any) {
+  } catch {
     removeTempFile();
     return res.status(500).json({ error: "Failed to upload attachment" });
   }
@@ -413,7 +561,7 @@ app.post("/api/tickets/:id/attachments", handleMulterUpload, async (req: Request
 app.get("/api/attachments/:id/metadata", async (req: Request, res: Response) => {
   try {
     const attachmentId = Number(req.params.id);
-    const requesterId = Number(req.query.requesterId || req.headers["x-requester-id"]);
+    const requesterId = req.user ? req.user.id : Number(req.query.requesterId || req.headers["x-requester-id"]);
 
     if (!attachmentId || isNaN(attachmentId)) {
       return res.status(400).json({ error: "Invalid attachment ID" });
@@ -429,7 +577,11 @@ app.get("/api/attachments/:id/metadata", async (req: Request, res: Response) => 
       return res.status(404).json({ error: "Attachment not found" });
     }
 
-    if (requesterId && attachment.ticket.requesterId !== requesterId) {
+    if (req.user) {
+      if (req.user.role === "REQUESTER" && attachment.ticket.requesterId !== req.user.id) {
+        return res.status(403).json({ error: "Access denied to attachment" });
+      }
+    } else if (requesterId && attachment.ticket.requesterId !== requesterId) {
       return res.status(403).json({ error: "Access denied to attachment" });
     }
 
@@ -440,11 +592,11 @@ app.get("/api/attachments/:id/metadata", async (req: Request, res: Response) => 
   }
 });
 
-// GET /api/attachments/:id/download - Stream/download active attachment
+// GET /api/attachments/:id/download - Download attachment
 app.get("/api/attachments/:id/download", async (req: Request, res: Response) => {
   try {
     const attachmentId = Number(req.params.id);
-    const requesterId = Number(req.query.requesterId || req.headers["x-requester-id"]);
+    const requesterId = req.user ? req.user.id : Number(req.query.requesterId || req.headers["x-requester-id"]);
 
     if (!attachmentId || isNaN(attachmentId)) {
       return res.status(400).json({ error: "Invalid attachment ID" });
@@ -460,12 +612,14 @@ app.get("/api/attachments/:id/download", async (req: Request, res: Response) => 
       return res.status(404).json({ error: "Attachment not found" });
     }
 
-    // Ownership check (BR-06)
-    if (requesterId && attachment.ticket.requesterId !== requesterId) {
+    if (req.user) {
+      if (req.user.role === "REQUESTER" && attachment.ticket.requesterId !== req.user.id) {
+        return res.status(403).json({ error: "Access denied to attachment" });
+      }
+    } else if (requesterId && attachment.ticket.requesterId !== requesterId) {
       return res.status(403).json({ error: "Access denied to attachment" });
     }
 
-    // Soft-removed download block check (BR-17, AC-09)
     if (attachment.isRemoved) {
       return res.status(403).json({
         error: "Removed attachments cannot be downloaded or previewed",
@@ -488,11 +642,11 @@ app.get("/api/attachments/:id/download", async (req: Request, res: Response) => 
   }
 });
 
-// PATCH /api/attachments/:id/remove - Soft-remove attachment with reason (BR-15, BR-16, AC-08)
+// PATCH /api/attachments/:id/remove
 const handleSoftRemove = async (req: Request, res: Response) => {
   try {
     const attachmentId = Number(req.params.id);
-    const requesterId = Number(req.body.requesterId || req.headers["x-requester-id"]);
+    const requesterId = req.user ? req.user.id : Number(req.body.requesterId || req.headers["x-requester-id"]);
     const removalReason = typeof req.body.removalReason === "string" ? req.body.removalReason.trim() : "";
 
     if (!attachmentId || isNaN(attachmentId)) {
@@ -515,8 +669,16 @@ const handleSoftRemove = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Attachment not found" });
     }
 
-    if (requesterId && attachment.ticket.requesterId !== requesterId) {
+    if (req.user) {
+      if (req.user.role === "REQUESTER" && attachment.ticket.requesterId !== req.user.id) {
+        return res.status(403).json({ error: "Access denied to attachment" });
+      }
+    } else if (requesterId && attachment.ticket.requesterId !== requesterId) {
       return res.status(403).json({ error: "Access denied to attachment" });
+    }
+
+    if (attachment.isRemoved) {
+      return res.status(400).json({ error: "Attachment is already removed" });
     }
 
     const updated = await prisma.attachment.update({
@@ -531,12 +693,782 @@ const handleSoftRemove = async (req: Request, res: Response) => {
     const { ticket, ...data } = updated as any;
     return res.status(200).json({ data });
   } catch {
-    return res.status(500).json({ error: "Failed to soft-remove attachment" });
+    return res.status(500).json({ error: "Failed to remove attachment" });
   }
 };
+
+// ---------------------------------------------------------------------------
+// IT Staff Ticket Queue & Workflow APIs (Lab 3)
+// ---------------------------------------------------------------------------
+
+// GET /api/staff/tickets - Query staff ticket queue with filters, sorting, and pagination
+app.get(
+  "/api/staff/tickets",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("IT_STAFF", "ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+      const categoryId = req.query.category ? Number(req.query.category) : undefined;
+      const priority = typeof req.query.priority === "string" && req.query.priority.trim() ? req.query.priority.trim() : undefined;
+      const status = typeof req.query.status === "string" && req.query.status.trim() ? req.query.status.trim() : undefined;
+      const ownerIdQuery = typeof req.query.ownerId === "string" ? req.query.ownerId.trim() : undefined;
+
+      const page = Math.max(1, Number(req.query.page || 1));
+      const pageSize = Math.min(50, Math.max(1, Number(req.query.pageSize || 10)));
+      const skip = (page - 1) * pageSize;
+
+      const sortBy = typeof req.query.sortBy === "string" ? req.query.sortBy.trim() : "createdAt";
+      const sortOrder = req.query.sortOrder === "asc" ? "asc" : "desc";
+
+      const where: any = {};
+
+      if (search) {
+        where.OR = [
+          { ticketNumber: { contains: search, mode: "insensitive" } },
+          { summary: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+        ];
+      }
+
+      if (categoryId && !isNaN(categoryId)) {
+        where.categoryId = categoryId;
+      }
+
+      if (priority) {
+        where.OR = [
+          { itPriority: priority },
+          { requestedPriority: priority },
+        ];
+      }
+
+      if (status) {
+        where.status = status;
+      }
+
+      if (ownerIdQuery) {
+        if (ownerIdQuery.toLowerCase() === "unassigned" || ownerIdQuery === "null") {
+          where.ownerId = null;
+        } else if (!isNaN(Number(ownerIdQuery))) {
+          where.ownerId = Number(ownerIdQuery);
+        }
+      }
+
+      const orderBy: any = {};
+      if (["createdAt", "updatedAt", "itPriority", "requestedPriority", "status", "ticketNumber", "id"].includes(sortBy)) {
+        orderBy[sortBy] = sortOrder;
+      } else {
+        orderBy.createdAt = "desc";
+      }
+
+      const prisma = getPrisma();
+      const [tickets, totalItems] = await Promise.all([
+        prisma.ticket.findMany({
+          where,
+          orderBy,
+          skip,
+          take: pageSize,
+          include: {
+            requester: { select: { id: true, name: true, email: true, department: true } },
+            owner: { select: { id: true, name: true, email: true } },
+            category: { select: { id: true, name: true, code: true } },
+            relatedSystem: { select: { id: true, name: true, code: true } },
+            _count: {
+              select: { attachments: true, publicComments: true, internalNotes: true },
+            },
+          },
+        }),
+        prisma.ticket.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+
+      return res.status(200).json({
+        data: tickets,
+        meta: { page, pageSize, totalItems, totalPages },
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: "Failed to fetch staff tickets" });
+    }
+  }
+);
+
+// PATCH /api/staff/tickets/:id - Claim, reassign, set IT Priority, update status
+app.patch(
+  "/api/staff/tickets/:id",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("IT_STAFF", "ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID" });
+      }
+
+      const prisma = getPrisma();
+      const existing = await prisma.ticket.findUnique({
+        where: { id: ticketId },
+      });
+      if (!existing) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      const { ownerId, itPriority, status, resolutionSummary } = req.body;
+
+      const dataToUpdate: any = {};
+
+      if (ownerId !== undefined) {
+        if (ownerId === "claim") {
+          dataToUpdate.ownerId = req.user!.id;
+        } else if (ownerId === null || ownerId === "unassigned") {
+          dataToUpdate.ownerId = null;
+        } else if (!isNaN(Number(ownerId))) {
+          dataToUpdate.ownerId = Number(ownerId);
+        }
+
+        if (existing.status === "NEW" && !status && dataToUpdate.ownerId) {
+          dataToUpdate.status = "ASSIGNED";
+        }
+      }
+
+      if (itPriority) {
+        if (!["LOW", "MEDIUM", "HIGH", "URGENT"].includes(itPriority)) {
+          return res.status(400).json({ error: "Invalid IT Priority" });
+        }
+        dataToUpdate.itPriority = itPriority;
+      }
+
+      if (status && status !== existing.status) {
+        const allowedTransitionsMap: Record<string, string[]> = {
+          NEW: ["OPEN", "ASSIGNED", "IN_PROGRESS", "CANCELLED"],
+          OPEN: ["IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "CANCELLED"],
+          ASSIGNED: ["IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "CANCELLED"],
+          IN_PROGRESS: ["WAITING_FOR_REQUESTER", "PENDING_CLIENT", "RESOLVED", "CANCELLED"],
+          WAITING_FOR_REQUESTER: ["IN_PROGRESS", "RESOLVED", "CANCELLED"],
+          PENDING_CLIENT: ["IN_PROGRESS", "RESOLVED", "CANCELLED"],
+          RESOLVED: ["CLOSED", "REOPENED"],
+          CLOSED: ["REOPENED"],
+          REOPENED: ["IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "RESOLVED"],
+          CANCELLED: [],
+        };
+
+        const allowed = allowedTransitionsMap[existing.status] || [];
+        if (!allowed.includes(status)) {
+          return res.status(400).json({
+            error: `Invalid status transition from ${existing.status} to ${status}`,
+          });
+        }
+
+        if (
+          (status === "RESOLVED" || status === "CLOSED") &&
+          (!resolutionSummary || typeof resolutionSummary !== "string" || !resolutionSummary.trim())
+        ) {
+          return res.status(400).json({
+            error: "Resolution summary is required when resolving or closing a ticket",
+          });
+        }
+
+        dataToUpdate.status = status;
+      }
+
+      if (resolutionSummary !== undefined) {
+        dataToUpdate.resolutionSummary =
+          typeof resolutionSummary === "string" ? resolutionSummary.trim() : "";
+      }
+
+      const updated = await prisma.ticket.update({
+        where: { id: ticketId },
+        data: dataToUpdate,
+        include: {
+          requester: { select: { id: true, name: true, email: true, department: true } },
+          owner: { select: { id: true, name: true, email: true } },
+          category: { select: { id: true, name: true, code: true } },
+          relatedSystem: { select: { id: true, name: true, code: true } },
+        },
+      });
+
+      return res.status(200).json({ data: updated });
+    } catch (err: any) {
+      return res.status(500).json({ error: "Failed to update ticket" });
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
+// Public Comments & Internal Notes APIs (Lab 3)
+// ---------------------------------------------------------------------------
+
+// GET /api/tickets/:id/public-comments
+app.get(
+  "/api/tickets/:id/public-comments",
+  requireAuth,
+  requirePasswordChanged,
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      if (req.user!.role === "REQUESTER" && ticket.requesterId !== req.user!.id) {
+        return res.status(403).json({ error: "Access denied to public comments" });
+      }
+
+      const comments = await prisma.publicComment.findMany({
+        where: { ticketId },
+        orderBy: { createdAt: "asc" },
+        include: {
+          author: { select: { id: true, name: true, email: true, role: true } },
+        },
+      });
+
+      const formatted = comments.map((c) => ({
+        ...c,
+        body: c.content,
+      }));
+
+      return res.status(200).json({ data: formatted });
+    } catch {
+      return res.status(500).json({ error: "Failed to fetch public comments" });
+    }
+  }
+);
+
+// POST /api/tickets/:id/public-comments
+app.post(
+  "/api/tickets/:id/public-comments",
+  requireAuth,
+  requirePasswordChanged,
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID" });
+      }
+
+      const body = typeof req.body.body === "string" ? req.body.body.trim() : (typeof req.body.content === "string" ? req.body.content.trim() : "");
+      if (!body || body.length > 2000) {
+        return res
+          .status(400)
+          .json({ error: "Comment body is required (max 2000 characters)" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      if (req.user!.role === "REQUESTER" && ticket.requesterId !== req.user!.id) {
+        return res
+          .status(403)
+          .json({ error: "Access denied to post comment on this ticket" });
+      }
+
+      const comment = await prisma.publicComment.create({
+        data: {
+          ticketId,
+          authorId: req.user!.id,
+          content: body,
+        },
+        include: {
+          author: { select: { id: true, name: true, email: true, role: true } },
+        },
+      });
+
+      // Side Effect (BR-12): If requester comments when PENDING_CLIENT, move back to IN_PROGRESS
+      if (req.user!.role === "REQUESTER" && ticket.status === "PENDING_CLIENT") {
+        await prisma.ticket.update({
+          where: { id: ticketId },
+          data: { status: "IN_PROGRESS" },
+        });
+      }
+
+      return res.status(201).json({
+        data: {
+          ...comment,
+          body: comment.content,
+        },
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: "Failed to post public comment" });
+    }
+  }
+);
+
+// POST /api/tickets/:id/resolve - Requester "Problem Appears Resolved" indication action
+app.post(
+  "/api/tickets/:id/resolve",
+  requireAuth,
+  requirePasswordChanged,
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      if (req.user!.role === "REQUESTER" && ticket.requesterId !== req.user!.id) {
+        return res.status(403).json({ error: "Access denied to ticket" });
+      }
+
+      // Add a Public Comment indicating problem appears resolved
+      await prisma.publicComment.create({
+        data: {
+          ticketId,
+          authorId: req.user!.id,
+          content: "Requester indicated: Problem Appears Resolved. Requesting IT Staff review.",
+        },
+      });
+
+      const updated = await prisma.ticket.update({
+        where: { id: ticketId },
+        data: { updatedAt: new Date() },
+        include: {
+          requester: { select: { id: true, name: true, email: true, department: true } },
+          owner: { select: { id: true, name: true, email: true } },
+          category: { select: { id: true, name: true, code: true } },
+          relatedSystem: { select: { id: true, name: true, code: true } },
+          attachments: true,
+        },
+      });
+
+      return res.status(200).json({ data: updated });
+    } catch {
+      return res.status(500).json({ error: "Failed to mark problem as resolved" });
+    }
+  }
+);
+
+// GET /api/tickets/:id/internal-notes
+app.get(
+  "/api/tickets/:id/internal-notes",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("IT_STAFF", "ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      const notes = await prisma.internalNote.findMany({
+        where: { ticketId },
+        orderBy: { createdAt: "asc" },
+        include: {
+          author: { select: { id: true, name: true, email: true, role: true } },
+        },
+      });
+
+      const formatted = notes.map((n) => ({
+        ...n,
+        body: n.content,
+      }));
+
+      return res.status(200).json({ data: formatted });
+    } catch {
+      return res.status(500).json({ error: "Failed to fetch internal notes" });
+    }
+  }
+);
+
+// POST /api/tickets/:id/internal-notes
+app.post(
+  "/api/tickets/:id/internal-notes",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("IT_STAFF", "ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID" });
+      }
+
+      const body = typeof req.body.body === "string" ? req.body.body.trim() : (typeof req.body.content === "string" ? req.body.content.trim() : "");
+      if (!body || body.length > 2000) {
+        return res
+          .status(400)
+          .json({ error: "Note body is required (max 2000 characters)" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      const note = await prisma.internalNote.create({
+        data: {
+          ticketId,
+          authorId: req.user!.id,
+          content: body,
+        },
+        include: {
+          author: { select: { id: true, name: true, email: true, role: true } },
+        },
+      });
+
+      return res.status(201).json({
+        data: {
+          ...note,
+          body: note.content,
+        },
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: "Failed to post internal note" });
+    }
+  }
+);
+
+// POST /api/tickets/:id/resolve (Requester mark problem resolved)
+app.post(
+  "/api/tickets/:id/resolve",
+  requireAuth,
+  requirePasswordChanged,
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+
+      if (req.user!.role === "REQUESTER" && ticket.requesterId !== req.user!.id) {
+        return res.status(403).json({ error: "Access denied to resolve this ticket" });
+      }
+
+      const updated = await prisma.ticket.update({
+        where: { id: ticketId },
+        data: { status: "RESOLVED" },
+      });
+
+      return res.status(200).json({ data: updated });
+    } catch {
+      return res.status(500).json({ error: "Failed to resolve ticket" });
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
+// Administrator User Management APIs (Lab 3)
+// ---------------------------------------------------------------------------
+
+// GET /api/admin/users - Query users list with role, search, active filters and pagination
+app.get(
+  "/api/admin/users",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+      const role = typeof req.query.role === "string" && req.query.role.trim() ? req.query.role.trim() : undefined;
+      const isActiveQuery =
+        req.query.isActive !== undefined
+          ? req.query.isActive === "true" || req.query.isActive === "1"
+          : undefined;
+
+      const page = Math.max(1, Number(req.query.page || 1));
+      const pageSize = Math.min(50, Math.max(1, Number(req.query.pageSize || 10)));
+      const skip = (page - 1) * pageSize;
+
+      const where: any = {};
+
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+        ];
+      }
+
+      if (role) {
+        where.role = role;
+      }
+
+      if (isActiveQuery !== undefined) {
+        where.isActive = isActiveQuery;
+      }
+
+      const prisma = getPrisma();
+      const [users, totalItems] = await Promise.all([
+        prisma.user.findMany({
+          where,
+          orderBy: { id: "asc" },
+          skip,
+          take: pageSize,
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            isActive: true,
+            mustChangePassword: true,
+            department: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        }),
+        prisma.user.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+
+      return res.status(200).json({
+        data: users,
+        meta: { page, pageSize, totalItems, totalPages },
+      });
+    } catch {
+      return res.status(500).json({ error: "Failed to fetch users" });
+    }
+  }
+);
+
+// POST /api/admin/users - Create User
+app.post(
+  "/api/admin/users",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const { name, email, role, department, initialPassword } = req.body;
+
+      if (!name || typeof name !== "string" || !name.trim()) {
+        return res.status(400).json({ error: "Name is required" });
+      }
+
+      if (!email || typeof email !== "string" || !email.includes("@")) {
+        return res.status(400).json({ error: "Valid email is required" });
+      }
+
+      if (!role || !["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(role)) {
+        return res.status(400).json({ error: "Valid role is required" });
+      }
+
+      const prisma = getPrisma();
+      const existingUser = await prisma.user.findUnique({
+        where: { email: email.toLowerCase().trim() },
+      });
+
+      if (existingUser) {
+        return res
+          .status(409)
+          .json({ error: "Email already in use", code: "DUPLICATE_EMAIL" });
+      }
+
+      const rawPassword =
+        initialPassword &&
+        typeof initialPassword === "string" &&
+        initialPassword.length >= 8
+          ? initialPassword
+          : "Password123!";
+      const passwordHash = hashPassword(rawPassword);
+
+      const newUser = await prisma.user.create({
+        data: {
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          role,
+          department: department ? String(department).trim() : null,
+          passwordHash,
+          mustChangePassword: true,
+          isActive: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          isActive: true,
+          mustChangePassword: true,
+          department: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return res.status(201).json({ data: newUser });
+    } catch {
+      return res.status(500).json({ error: "Failed to create user" });
+    }
+  }
+);
+
+// PATCH /api/admin/users/:id - Edit User Details / Role / Deactivate
+app.patch(
+  "/api/admin/users/:id",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.params.id);
+      if (!userId || isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const { name, email, role, isActive, department } = req.body;
+
+      const prisma = getPrisma();
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!existingUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Safety check: Cannot deactivate own account
+      if (isActive === false && req.user!.id === userId) {
+        return res
+          .status(400)
+          .json({ error: "Cannot deactivate your own account" });
+      }
+
+      // Safety check: Cannot deactivate or demote last active Administrator
+      if (existingUser.role === "ADMINISTRATOR" && existingUser.isActive) {
+        const isDeactivating = isActive === false;
+        const isDemoting = role && role !== "ADMINISTRATOR";
+        if (isDeactivating || isDemoting) {
+          const activeAdminCount = await prisma.user.count({
+            where: { role: "ADMINISTRATOR", isActive: true },
+          });
+          if (activeAdminCount <= 1) {
+            return res
+              .status(400)
+              .json({ error: "Cannot deactivate or demote the last active administrator" });
+          }
+        }
+      }
+
+      const dataToUpdate: any = {};
+
+      if (name && typeof name === "string") dataToUpdate.name = name.trim();
+
+      if (
+        email &&
+        typeof email === "string" &&
+        email.toLowerCase().trim() !== existingUser.email
+      ) {
+        const emailCheck = await prisma.user.findUnique({
+          where: { email: email.toLowerCase().trim() },
+        });
+        if (emailCheck) {
+          return res
+            .status(409)
+            .json({ error: "Email already in use", code: "DUPLICATE_EMAIL" });
+        }
+        dataToUpdate.email = email.toLowerCase().trim();
+      }
+
+      if (role && ["REQUESTER", "IT_STAFF", "ADMINISTRATOR"].includes(role)) {
+        dataToUpdate.role = role;
+      }
+
+      if (typeof isActive === "boolean") {
+        dataToUpdate.isActive = isActive;
+      }
+
+      if (department !== undefined) {
+        dataToUpdate.department = department ? String(department).trim() : null;
+      }
+
+      const updated = await prisma.user.update({
+        where: { id: userId },
+        data: dataToUpdate,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          isActive: true,
+          mustChangePassword: true,
+          department: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return res.status(200).json({ data: updated });
+    } catch {
+      return res.status(500).json({ error: "Failed to update user" });
+    }
+  }
+);
+
+// POST /api/admin/users/:id/reset-password - Admin Reset Password
+app.post(
+  "/api/admin/users/:id/reset-password",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.params.id);
+      if (!userId || isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const prisma = getPrisma();
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!existingUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const newPassword =
+        req.body.newPassword && typeof req.body.newPassword === "string"
+          ? req.body.newPassword
+          : "Password123!";
+      const passwordHash = hashPassword(newPassword);
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          passwordHash,
+          mustChangePassword: true,
+        },
+      });
+
+      return res.status(200).json({ message: "User password reset successfully" });
+    } catch {
+      return res.status(500).json({ error: "Failed to reset password" });
+    }
+  }
+);
 
 app.patch("/api/attachments/:id/remove", handleSoftRemove);
 app.delete("/api/attachments/:id/remove", handleSoftRemove);
 app.delete("/api/attachments/:id", handleSoftRemove);
+app.delete("/api/tickets/:id/attachments/:attachmentId", handleSoftRemove);
 
 export default app;

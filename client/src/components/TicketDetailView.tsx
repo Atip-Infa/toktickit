@@ -6,8 +6,11 @@ import {
   uploadAttachment,
   softRemoveAttachment,
   getAttachmentDownloadUrl,
+  resolveTicketByRequester,
 } from "../api.js";
 import { useRequester } from "../context/RequesterContext.js";
+import { useAuth } from "../context/AuthContext.js";
+import { PublicCommentsSection } from "./PublicCommentsSection.js";
 
 interface TicketDetailViewProps {
   ticketId: number;
@@ -19,6 +22,9 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
   onBack,
 }) => {
   const { selectedRequester } = useRequester();
+  const { user } = useAuth();
+  const [resolving, setResolving] = useState<boolean>(false);
+  const [resolveSuccess, setResolveSuccess] = useState<string>("");
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -35,13 +41,15 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
   const [removing, setRemoving] = useState<boolean>(false);
 
   const loadTicket = async () => {
-    if (!selectedRequester || !ticketId) return;
+    const activeRequesterId = user?.id || selectedRequester?.id;
+    if (!activeRequesterId && !user) return;
+    if (!ticketId) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const data = await fetchTicketDetail(ticketId, selectedRequester.id);
+      const data = await fetchTicketDetail(ticketId, activeRequesterId);
       setTicket(data);
     } catch (err: any) {
       setError(err?.message || "Failed to load ticket detail");
@@ -52,12 +60,30 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
 
   useEffect(() => {
     loadTicket();
-  }, [ticketId, selectedRequester?.id]);
+  }, [ticketId, selectedRequester?.id, user?.id]);
+
+  const handleResolveClick = async () => {
+    if (!ticket || resolving) return;
+    setResolving(true);
+    setResolveSuccess("");
+    setError("");
+
+    try {
+      const updated = await resolveTicketByRequester(ticket.id);
+      setTicket(updated);
+      setResolveSuccess("Thank you! Ticket marked as Problem Appears Resolved.");
+    } catch (err: any) {
+      setError(err?.message || "Failed to mark problem as resolved.");
+    } finally {
+      setResolving(false);
+    }
+  };
 
   // Upload attachment trigger
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0 || !ticket || !selectedRequester) return;
+    const activeRequesterId = user?.id || selectedRequester?.id;
+    if (!files || files.length === 0 || !ticket) return;
 
     const file = files[0];
     setUploadError("");
@@ -81,7 +107,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
     setUploading(true);
 
     try {
-      await uploadAttachment(ticket.id, file, selectedRequester.id);
+      await uploadAttachment(ticket.id, file, activeRequesterId);
       e.target.value = "";
       await loadTicket(); // Refresh ticket detail
     } catch (err: any) {
@@ -93,7 +119,8 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
 
   // Submit soft removal with reason (BR-15, BR-16, AC-08)
   const handleConfirmRemoval = async () => {
-    if (!removingAttachmentId || !selectedRequester || !ticket) return;
+    const activeRequesterId = user?.id || selectedRequester?.id;
+    if (!removingAttachmentId || !ticket) return;
 
     const trimmedReason = removalReason.trim();
     if (trimmedReason.length < 3) {
@@ -185,7 +212,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
   const isMaxAttachmentsReached = activeAttachments.length >= 5;
 
   return (
-    <div className="container py-4" style={{ maxWidth: "920px" }}>
+    <div className="container py-3 py-sm-4" style={{ maxWidth: "920px" }}>
       {/* Back Navigation & Header Bar */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <button className="btn btn-outline-secondary btn-sm" onClick={onBack}>
@@ -198,7 +225,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
       </div>
 
       {/* Main Ticket Read-Only Detail Card */}
-      <div className="zen-card p-4 p-md-5 mb-4">
+      <div className="zen-card p-3 p-sm-4 p-md-5 mb-4">
         {/* Header Title Section */}
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-start border-bottom pb-3 mb-4 gap-2">
           <div>
@@ -209,7 +236,19 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
               {new Date(ticket.updatedAt).toLocaleString()}
             </div>
           </div>
+          {["NEW", "ASSIGNED", "IN_PROGRESS", "PENDING_CLIENT", "WAITING_FOR_REQUESTER"].includes(ticket.status) && (
+            <button
+              type="button"
+              className="btn btn-outline-success btn-sm font-semibold d-flex align-items-center gap-1 mt-2 mt-md-0"
+              disabled={resolving}
+              onClick={handleResolveClick}
+            >
+              {resolving ? "Updating..." : "✅ Problem Appears Resolved"}
+            </button>
+          )}
         </div>
+
+        {resolveSuccess && <div className="alert alert-success py-2 small mb-3">{resolveSuccess}</div>}
 
         {/* Metadata Fields Grid */}
         <div
@@ -397,6 +436,9 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
           )}
         </div>
       </div>
+
+      {/* Public Comments */}
+      {ticket && <PublicCommentsSection ticketId={ticket.id} />}
 
       {/* Soft Removal Reason Modal / Card overlay */}
       {removingAttachmentId !== null && (
