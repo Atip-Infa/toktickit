@@ -101,6 +101,7 @@ export interface Ticket {
   relatedSystem?: { id: number; name: string; code?: string };
   requester?: { id: number; name: string; email: string; department?: string };
   owner?: { id: number; name: string; email: string };
+  itOwnerName?: string | null;
   requestedPriority: string;
   itPriority: string;
   status: string;
@@ -122,6 +123,16 @@ export interface MyTicketsQueryParams {
   sortOrder?: string;
   page?: number;
   pageSize?: number;
+}
+
+export interface MyTicketsResponse {
+  data: Ticket[];
+  meta: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  };
 }
 
 export interface PublicComment {

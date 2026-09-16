@@ -332,7 +332,7 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
                     <td className="text-nowrap">{renderPriorityBadge(t.requestedPriority)}</td>
                     <td className="text-nowrap">{renderPriorityBadge(t.itPriority)}</td>
                     <td className="text-nowrap">{renderStatusBadge(t.status)}</td>
-                    <td className="small text-muted text-nowrap">{t.itOwnerName || "Unassigned"}</td>
+                    <td className="small text-muted text-nowrap">{t.owner?.name || t.itOwnerName || "Unassigned"}</td>
                     <td className="small text-muted text-nowrap">{new Date(t.updatedAt).toLocaleDateString()}</td>
                   </tr>
                 ))}

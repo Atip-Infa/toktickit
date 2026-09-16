@@ -132,7 +132,7 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
     setRemovalReasonError("");
 
     try {
-      await softRemoveAttachment(removingAttachmentId, trimmedReason, selectedRequester.id);
+      await softRemoveAttachment(removingAttachmentId, trimmedReason, selectedRequester?.id);
       setRemovingAttachmentId(null);
       setRemovalReason("");
       await loadTicket(); // Refresh ticket detail
