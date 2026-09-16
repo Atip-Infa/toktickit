@@ -146,7 +146,7 @@ export const CreateTicketForm: React.FC<CreateTicketFormProps> = ({
       // 2. Upload attachments if any selected
       if (attachments.length > 0) {
         const uploadResults = await Promise.allSettled(
-          attachments.map((file) => uploadAttachment(ticket.id, file, selectedRequester.id))
+          attachments.map((file) => uploadAttachment(ticket.id, file, selectedRequester?.id))
         );
 
         const failedUploads = uploadResults.filter((r) => r.status === "rejected");
