@@ -1,29 +1,35 @@
-# dependencies
+# Dependencies
 node_modules/
 
-# env & secrets
+# Environment Variables & Secrets
 .env
 *.env
 !.env.example
 
-# build output & cache
+# Build Output & Caches
 dist/
 build/
 .vite/
+*.tsbuildinfo
 
-# test results & coverage (Playwright & Vitest)
+# Test Results, Reports & Coverage (Playwright & Vitest)
 test-results/
 playwright-report/
 blob-report/
 coverage/
 .vitest/
 
-# prisma
+# Database Files (Prisma SQLite / Local DBs)
 server/prisma/*.db
 server/prisma/*.db-journal
 
-# logs & OS
+# File Upload Storage
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Operating System Files & Logs
 *.log
 .DS_Store
 Thumbs.db
-
+.vscode/
+.idea/
