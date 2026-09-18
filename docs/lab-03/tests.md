@@ -13,7 +13,7 @@ The test strategy covers:
 * **Responsive & Accessibility Tests**: Mobile, tablet, and desktop layout rendering and keyboard accessibility.
 * **End-to-End (E2E) Tests**: Complete Playwright browser automation covering authentication, mandatory password changes, IT Staff workflows, and user administration (`e2e/lab-03/`).
 
-*Note: In accordance with Test-Driven Development (TDD) guidelines, all tests in this document are planned specifications. Test status will be updated upon execution.*
+*Note: All tests defined in this document have been executed across unit, API integration, client component, and Playwright E2E test suites with a 100% pass rate.*
 
 ---
 
@@ -21,39 +21,39 @@ The test strategy covers:
 
 | Requirement ID | Acceptance Criterion | Test ID | Test Type | Target Test File | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `FR-01`, `BR-01` | `AC-01` (Valid login returns user identity & role) | `API-AUTH-01` | API | `server/tests/lab-03/auth.api.test.ts` | Planned |
-| `FR-01`, `BR-01` | `AC-01` (Invalid credentials rejected) | `API-AUTH-02` | API | `server/tests/lab-03/auth.api.test.ts` | Planned |
-| `FR-03`, `BR-01` | `AC-03` (Inactive user login rejected) | `API-AUTH-03` | API | `server/tests/lab-03/auth.api.test.ts` | Planned |
-| `FR-02`, `BR-02` | `AC-02` (Mandatory password change blocks app) | `API-AUTH-04` | API | `server/tests/lab-03/auth.api.test.ts` | Planned |
-| `FR-05` | `AC-01` (Logout invalidates session) | `API-AUTH-05` | API | `server/tests/lab-03/auth.api.test.ts` | Planned |
-| `FR-04` | `AC-01` (Retrieve current user context `/me`) | `API-AUTH-06` | API | `server/tests/lab-03/auth.api.test.ts` | Planned |
-| `FR-06`, `BR-06` | `AC-04` (Requester accesses owned tickets only) | `API-AUTHZ-01` | Security | `server/tests/lab-03/authorization.api.test.ts` | Planned |
-| `FR-06`, `BR-06` | `AC-04` (Requester client identity spoofing ignored) | `API-AUTHZ-02` | Security | `server/tests/lab-03/authorization.api.test.ts` | Planned |
-| `FR-14`, `BR-14` | `AC-05` (Requester access to Internal Notes denied 403) | `API-AUTHZ-03` | Security | `server/tests/lab-03/authorization.api.test.ts` | Planned |
-| `FR-15` | `AC-12` (Non-Admin access to User Admin APIs denied) | `API-AUTHZ-04` | Security | `server/tests/lab-03/authorization.api.test.ts` | Planned |
-| `FR-09` | `AC-06` (IT Staff Queue query: search, filter, paginate) | `API-QUEUE-01` | API | `server/tests/lab-03/staff-queue.api.test.ts` | Planned |
-| `FR-09` | `AC-06` (IT Staff Queue sorting) | `API-QUEUE-02` | API | `server/tests/lab-03/staff-queue.api.test.ts` | Planned |
-| `FR-10` | `AC-07` (IT Staff claim or reassign ownership) | `API-DETAIL-01` | API | `server/tests/lab-03/staff-ticket-detail.api.test.ts` | Planned |
-| `FR-11`, `BR-09` | `AC-08` (IT Staff update IT Priority) | `API-DETAIL-02` | API | `server/tests/lab-03/staff-ticket-detail.api.test.ts` | Planned |
-| `FR-12`, `BR-12` | `AC-09` (Permitted ticket status transitions) | `API-DETAIL-03` | API | `server/tests/lab-03/staff-ticket-detail.api.test.ts` | Planned |
-| `FR-12`, `BR-12` | `AC-09` (Invalid ticket status transitions rejected) | `API-DETAIL-04` | API | `server/tests/lab-03/staff-ticket-detail.api.test.ts` | Planned |
-| `FR-07`, `FR-13` | `AC-10` (Post & retrieve Public Comments) | `API-NOTE-01` | API | `server/tests/lab-03/comments-notes.api.test.ts` | Planned |
-| `FR-14`, `BR-14` | `AC-11` (IT Staff post & retrieve Internal Notes) | `API-NOTE-02` | API | `server/tests/lab-03/comments-notes.api.test.ts` | Planned |
-| `FR-13`, `FR-14` | `AC-10`, `AC-11` (Reject empty/whitespace comments & notes) | `API-NOTE-03` | API | `server/tests/lab-03/comments-notes.api.test.ts` | Planned |
-| `FR-15` | `AC-12` (Admin list users with search and role filter) | `API-ADMIN-01` | API | `server/tests/lab-03/users-admin.api.test.ts` | Planned |
-| `FR-16`, `BR-15` | `AC-13` (Admin create user & reject duplicate email 409) | `API-ADMIN-02` | API | `server/tests/lab-03/users-admin.api.test.ts` | Planned |
-| `FR-17` | `AC-12` (Admin edit user basic info & status) | `API-ADMIN-03` | API | `server/tests/lab-03/users-admin.api.test.ts` | Planned |
-| `BR-17` | `AC-14` (Admin self-deactivation guard rejected 400) | `API-ADMIN-04` | Security | `server/tests/lab-03/users-admin.api.test.ts` | Planned |
-| `BR-18` | `AC-14` (Last active Admin deactivation guard rejected 400) | `API-ADMIN-05` | Security | `server/tests/lab-03/users-admin.api.test.ts` | Planned |
-| `FR-18` | `AC-15` (Admin set initial password triggers password change) | `API-ADMIN-06` | API | `server/tests/lab-03/users-admin.api.test.ts` | Planned |
-| `FR-01`, `FR-03` | `AC-01`, `AC-03` (Login UI form submission & errors) | `UI-AUTH-01` | UI | `client/tests/lab-03/Login.test.tsx` | Planned |
-| `FR-02`, `BR-02` | `AC-02` (Mandatory Change Password UI validation) | `UI-AUTH-02` | UI | `client/tests/lab-03/ChangePassword.test.tsx` | Planned |
-| `FR-09` | `AC-06` (IT Staff Queue UI search, filters & pagination) | `UI-QUEUE-01` | UI | `client/tests/lab-03/StaffTicketQueue.test.tsx` | Planned |
-| `FR-10`-`FR-14` | `AC-07`-`AC-11` (IT Staff Detail UI controls, comments & notes) | `UI-DETAIL-01` | UI | `client/tests/lab-03/StaffTicketDetail.test.tsx` | Planned |
-| `FR-15`-`FR-18` | `AC-12`-`AC-15` (Admin User Management UI modals & validation) | `UI-ADMIN-01` | UI | `client/tests/lab-03/UserManagement.test.tsx` | Planned |
-| `FR-01`-`FR-05` | `AC-01`-`AC-03` (End-to-End Authentication flow) | `E2E-01` | E2E | `e2e/lab-03/authentication.spec.ts` | Planned |
-| `FR-09`-`FR-14` | `AC-06`-`AC-11` (End-to-End IT Staff Queue & Detail flow) | `E2E-02` | E2E | `e2e/lab-03/staff-ticket-flow.spec.ts` | Planned |
-| `FR-15`-`FR-18` | `AC-12`-`AC-15` (End-to-End User Administration flow) | `E2E-03` | E2E | `e2e/lab-03/user-administration.spec.ts` | Planned |
+| `FR-01`, `BR-01` | `AC-01` (Valid login returns user identity & role) | `API-AUTH-01` | API | `server/tests/lab-03/auth.api.test.ts` | Passed |
+| `FR-01`, `BR-01` | `AC-01` (Invalid credentials rejected) | `API-AUTH-02` | API | `server/tests/lab-03/auth.api.test.ts` | Passed |
+| `FR-03`, `BR-01` | `AC-03` (Inactive user login rejected) | `API-AUTH-03` | API | `server/tests/lab-03/auth.api.test.ts` | Passed |
+| `FR-02`, `BR-02` | `AC-02` (Mandatory password change blocks app) | `API-AUTH-04` | API | `server/tests/lab-03/auth.api.test.ts` | Passed |
+| `FR-05` | `AC-01` (Logout invalidates session) | `API-AUTH-05` | API | `server/tests/lab-03/auth.api.test.ts` | Passed |
+| `FR-04` | `AC-01` (Retrieve current user context `/me`) | `API-AUTH-06` | API | `server/tests/lab-03/auth.api.test.ts` | Passed |
+| `FR-06`, `BR-06` | `AC-04` (Requester accesses owned tickets only) | `API-AUTHZ-01` | Security | `server/tests/lab-03/authorization.api.test.ts` | Passed |
+| `FR-06`, `BR-06` | `AC-04` (Requester client identity spoofing ignored) | `API-AUTHZ-02` | Security | `server/tests/lab-03/authorization.api.test.ts` | Passed |
+| `FR-14`, `BR-14` | `AC-05` (Requester access to Internal Notes denied 403) | `API-AUTHZ-03` | Security | `server/tests/lab-03/authorization.api.test.ts` | Passed |
+| `FR-15` | `AC-12` (Non-Admin access to User Admin APIs denied) | `API-AUTHZ-04` | Security | `server/tests/lab-03/authorization.api.test.ts` | Passed |
+| `FR-09` | `AC-06` (IT Staff Queue query: search, filter, paginate) | `API-QUEUE-01` | API | `server/tests/lab-03/staff-queue.api.test.ts` | Passed |
+| `FR-09` | `AC-06` (IT Staff Queue sorting) | `API-QUEUE-02` | API | `server/tests/lab-03/staff-queue.api.test.ts` | Passed |
+| `FR-10` | `AC-07` (IT Staff claim or reassign ownership) | `API-DETAIL-01` | API | `server/tests/lab-03/staff-ticket-detail.api.test.ts` | Passed |
+| `FR-11`, `BR-09` | `AC-08` (IT Staff update IT Priority) | `API-DETAIL-02` | API | `server/tests/lab-03/staff-ticket-detail.api.test.ts` | Passed |
+| `FR-12`, `BR-12` | `AC-09` (Permitted ticket status transitions) | `API-DETAIL-03` | API | `server/tests/lab-03/staff-ticket-detail.api.test.ts` | Passed |
+| `FR-12`, `BR-12` | `AC-09` (Invalid ticket status transitions rejected) | `API-DETAIL-04` | API | `server/tests/lab-03/staff-ticket-detail.api.test.ts` | Passed |
+| `FR-07`, `FR-13` | `AC-10` (Post & retrieve Public Comments) | `API-NOTE-01` | API | `server/tests/lab-03/comments-notes.api.test.ts` | Passed |
+| `FR-14`, `BR-14` | `AC-11` (IT Staff post & retrieve Internal Notes) | `API-NOTE-02` | API | `server/tests/lab-03/comments-notes.api.test.ts` | Passed |
+| `FR-13`, `FR-14` | `AC-10`, `AC-11` (Reject empty/whitespace comments & notes) | `API-NOTE-03` | API | `server/tests/lab-03/comments-notes.api.test.ts` | Passed |
+| `FR-15` | `AC-12` (Admin list users with search and role filter) | `API-ADMIN-01` | API | `server/tests/lab-03/users-admin.api.test.ts` | Passed |
+| `FR-16`, `BR-15` | `AC-13` (Admin create user & reject duplicate email 409) | `API-ADMIN-02` | API | `server/tests/lab-03/users-admin.api.test.ts` | Passed |
+| `FR-17` | `AC-12` (Admin edit user basic info & status) | `API-ADMIN-03` | API | `server/tests/lab-03/users-admin.api.test.ts` | Passed |
+| `BR-17` | `AC-14` (Admin self-deactivation guard rejected 400) | `API-ADMIN-04` | Security | `server/tests/lab-03/users-admin.api.test.ts` | Passed |
+| `BR-18` | `AC-14` (Last active Admin deactivation guard rejected 400) | `API-ADMIN-05` | Security | `server/tests/lab-03/users-admin.api.test.ts` | Passed |
+| `FR-18` | `AC-15` (Admin set initial password triggers password change) | `API-ADMIN-06` | API | `server/tests/lab-03/users-admin.api.test.ts` | Passed |
+| `FR-01`, `FR-03` | `AC-01`, `AC-03` (Login UI form submission & errors) | `UI-AUTH-01` | UI | `client/tests/lab-03/Login.test.tsx` | Passed |
+| `FR-02`, `BR-02` | `AC-02` (Mandatory Change Password UI validation) | `UI-AUTH-02` | UI | `client/tests/lab-03/ChangePassword.test.tsx` | Passed |
+| `FR-09` | `AC-06` (IT Staff Queue UI search, filters & pagination) | `UI-QUEUE-01` | UI | `client/tests/lab-03/StaffTicketQueue.test.tsx` | Passed |
+| `FR-10`-`FR-14` | `AC-07`-`AC-11` (IT Staff Detail UI controls, comments & notes) | `UI-DETAIL-01` | UI | `client/tests/lab-03/StaffTicketDetail.test.tsx` | Passed |
+| `FR-15`-`FR-18` | `AC-12`-`AC-15` (Admin User Management UI modals & validation) | `UI-ADMIN-01` | UI | `client/tests/lab-03/UserManagement.test.tsx` | Passed |
+| `FR-01`-`FR-05` | `AC-01`-`AC-03` (End-to-End Authentication flow) | `E2E-01` | E2E | `e2e/lab-03/authentication.spec.ts` | Passed |
+| `FR-09`-`FR-14` | `AC-06`-`AC-11` (End-to-End IT Staff Queue & Detail flow) | `E2E-02` | E2E | `e2e/lab-03/staff-ticket-flow.spec.ts` | Passed |
+| `FR-15`-`FR-18` | `AC-12`-`AC-15` (End-to-End User Administration flow) | `E2E-03` | E2E | `e2e/lab-03/user-administration.spec.ts` | Passed |
 
 ---
 

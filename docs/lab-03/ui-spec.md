@@ -138,3 +138,71 @@ Consistent pill-style badges with uppercase bold text:
 * **Tablet (768px - 991px)**: Responsive data tables with scrollable horizontal containers, collapsed filter drawer.
 * **Mobile (< 767px)**: Data tables collapse into stacked Zen Green card lists with bold labels. Single-column forms with full-width primary buttons.
 * **Accessibility (WCAG 2.1 AA)**: Minimum contrast ratio 4.5:1, keyboard focus outlines on interactive controls, explicit `aria-label` attributes on icon buttons and search inputs.
+
+---
+
+## 6. Completed Visual Checklist & Responsive Evidence Matrix
+
+### 6.1. Visual Consistency & UI Layout Checklist
+- [x] **Zen Green Design System**: Deep Zen Green branding (`#055037`), crisp surface cards (`#ffffff`), rounded corners (`8px`/`16px`), and standardized typography across all screens.
+- [x] **Role Navigation (`AppHeader.tsx`)**:
+  - `Requester`: Displays "My Tickets", "Create Ticket" navigation links and `Requester` role badge.
+  - `IT Staff`: Displays "IT Ticket Queue" navigation link and `IT Staff` role badge.
+  - `Administrator`: Displays "User Management" navigation link and `Administrator` role badge.
+- [x] **Status & Priority Badges**:
+  - `NEW` (Light Blue), `IN_PROGRESS` (Amber), `WAITING_FOR_REQUESTER` (Purple), `RESOLVED` (Emerald Green), `CLOSED` (Cool Gray).
+  - Priority Badges: `LOW` (Gray), `MEDIUM` (Warm Amber), `HIGH` (Bright Orange), `URGENT` (Crimson Red).
+- [x] **Editable vs. Read-Only Fields**:
+  - `Requester`: Read-only ticket summary, description, requested priority, and IT Priority. Editable public comments.
+  - `IT Staff`: Editable IT Priority, Status dropdown (permitted matrix only), Owner reassignment, and Internal Notes.
+  - `Administrator`: Editable user role, status toggle switch, name, email, and password reset. Self-deactivation disabled for active admin.
+- [x] **Validation Placement & Error Feedback**:
+  - Inline red error banners rendered directly above or below form inputs.
+  - Form validation safely handles empty required fields (e.g. missing Resolution Summary when resolving a ticket).
+- [x] **Accessibility & Focus Indicators**:
+  - High-contrast interactive focus rings (`outline: 2px solid #055037`, `outline-offset: 2px`) on all buttons, inputs, selects, and textareas.
+  - Full keyboard accessibility and screen-reader `aria-label` tags.
+- [x] **Layout Integrity Verification**:
+  - **No Text Clipping**: All titles, table cells, and badges wrap or truncate gracefully with tooltips.
+  - **No Element Overlap**: Modals, dropdowns, and alert banners maintain clean z-index stacking context without overlapping control bars.
+  - **No Horizontal Overflow**: Zero unwanted horizontal scrollbars on desktop (1440x900), tablet (800x1000), or mobile (375x812) viewports.
+
+---
+
+### 6.2. Responsive & Feature Screenshot Evidence Matrix
+
+#### 1. Authentication & Security Screenshots
+- **Login Screen**: [01-login-screen.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/01-login-screen.png)
+- **Busy State Feedback**: [00-busy-signing-in-state.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/authentication/00-busy-signing-in-state.png)
+- **Invalid Credentials Rejection**: [01-invalid-credentials-rejection.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/authentication/01-invalid-credentials-rejection.png)
+- **Inactive Account Blocking**: [02-inactive-account-rejection.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/authentication/02-inactive-account-rejection.png)
+- **Mandatory Password Change**: [03-mandatory-password-change.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/authentication/03-mandatory-password-change.png)
+- **Valid Role Header & Session**: [04-valid-login-authenticated-role-header.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/authentication/04-valid-login-authenticated-role-header.png)
+
+#### 2. IT Staff Ticket Queue UI Screenshots
+- **Desktop Queue View (1440x900)**: [queue-desktop.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/queue-desktop.png)
+- **Tablet Queue View (800x1000)**: [queue-tablet.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/queue-tablet.png)
+- **Mobile Queue View (375x812 Stacked Cards)**: [queue-mobile.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/queue-mobile.png)
+- **Queue Realistic Data & Badges**: [01-queue-realistic-data-badges.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/staff-queue/01-queue-realistic-data-badges.png)
+- **Search, Filters & Sorting**: [02-queue-search-filtering-sorting.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/staff-queue/02-queue-search-filtering-sorting.png)
+
+#### 3. Working IT Staff Ticket Detail UI Screenshots
+- **Unassigned Claim Button State**: [claim-reassign-unassigned.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/claim-reassign-unassigned.png)
+- **Claimed & Assigned State**: [claim-reassign-claimed.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/claim-reassign-claimed.png)
+- **IT Priority Adjustment & Preservation**: [it-priority-demonstration.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/it-priority-demonstration.png)
+- **Permitted Status Changes & Resolution Summary**: [permitted-status-changes.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/permitted-status-changes.png)
+- **Public Comments Stream**: [public-comments-demonstration.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/public-comments-demonstration.png)
+- **Internal Notes Section (IT Staff Only)**: [internal-notes-demonstration.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/internal-notes-demonstration.png)
+- **Attachment Continuity**: [attachment-continuity-demonstration.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/attachment-continuity-demonstration.png)
+- **Requester Resolution Indication & Role Restrictions**: [requester-resolution-role-restriction.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/requester-resolution-role-restriction.png)
+- **Validation Safe Failure Behavior**: [validation-safe-failure-behavior.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/validation-safe-failure-behavior.png)
+- **Direct API Authorization 403 Evidence Picture**: [direct-api-authorization-evidence.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/direct-api-authorization-evidence.png)
+
+#### 4. Administrator User Management UI Screenshots
+- **User List Table, Search & Filters**: [admin-user-list-search-filters.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/admin-user-list-search-filters.png)
+- **Create User Modal Dialog**: [admin-create-user-modal.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/admin-create-user-modal.png)
+- **Duplicate Email Validation Error**: [admin-duplicate-email-validation.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/admin-duplicate-email-validation.png)
+- **Edit User Modal & Self-Deactivation Prevention**: [admin-edit-user-self-deactivation-prevention.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/admin-edit-user-self-deactivation-prevention.png)
+- **Reset Initial Password Modal Dialog**: [admin-reset-password-modal.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/admin-reset-password-modal.png)
+- **Non-Administrator Access Blocked (403 Forbidden)**: [admin-non-admin-access-blocked.png](file:///c:/Users/Atip/Downloads/toktickit/artifacts/lab-03/screenshots/admin-non-admin-access-blocked.png)
+
