@@ -33,6 +33,9 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
   const [ownerId, setOwnerId] = useState<string>("");
   const [resolutionSummary, setResolutionSummary] = useState<string>("");
 
+  // Active Tab state for UI layout (Public Comments, Internal Notes, Attachments, Service Actions)
+  const [activeTab, setActiveTab] = useState<"all" | "comments" | "notes" | "attachments" | "actions">("comments");
+
   // Attachment Removal Modal state
   const [removingAttachmentId, setRemovingAttachmentId] = useState<number | null>(null);
   const [removalReason, setRemovalReason] = useState<string>("");
@@ -276,11 +279,136 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
             )}
           </div>
 
-          {/* Public Comments Section */}
-          <PublicCommentsSection ticketId={ticket.id} />
+          {/* Tab Header Bar (Identical to Handout Screenshot) */}
+          <div className="bg-light p-2 rounded-top border-top border-start border-end d-flex gap-2 flex-wrap mb-0">
+            <button
+              type="button"
+              className={`btn btn-sm fw-semibold rounded-3 d-flex align-items-center gap-1 ${
+                activeTab === "comments" ? "btn-success text-white" : "btn-outline-secondary bg-white"
+              }`}
+              onClick={() => setActiveTab("comments")}
+            >
+              <span>💬 Public Comments</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm fw-semibold rounded-3 d-flex align-items-center gap-1 ${
+                activeTab === "notes" ? "btn-success text-white" : "btn-outline-secondary bg-white"
+              }`}
+              onClick={() => setActiveTab("notes")}
+            >
+              <span>📝 Internal Notes</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm fw-semibold rounded-3 d-flex align-items-center gap-1 ${
+                activeTab === "attachments" ? "btn-success text-white" : "btn-outline-secondary bg-white"
+              }`}
+              onClick={() => setActiveTab("attachments")}
+            >
+              <span>📎 Attachments ({ticket.attachments?.length || 0})</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm fw-semibold rounded-3 d-flex align-items-center gap-1 ${
+                activeTab === "actions" ? "btn-success text-white" : "btn-outline-secondary bg-white"
+              }`}
+              onClick={() => setActiveTab("actions")}
+            >
+              <span>🛠️ Service Actions</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm fw-semibold rounded-3 ms-auto ${
+                activeTab === "all" ? "btn-dark text-white" : "btn-outline-dark"
+              }`}
+              onClick={() => setActiveTab("all")}
+            >
+              👁️ View All
+            </button>
+          </div>
 
-          {/* Internal Notes Section (IT Staff ONLY) */}
-          <InternalNotesSection ticketId={ticket.id} />
+          {/* Tab Content Display */}
+          {(activeTab === "comments" || activeTab === "all") && (
+            <PublicCommentsSection ticketId={ticket.id} />
+          )}
+
+          {(activeTab === "notes" || activeTab === "all") && (
+            <InternalNotesSection ticketId={ticket.id} />
+          )}
+
+          {(activeTab === "attachments" || activeTab === "all") && (
+            <div className="card shadow-sm border mb-4">
+              <div className="card-header bg-light py-3">
+                <h3 className="h6 mb-0 fw-bold d-flex align-items-center gap-2">
+                  📎 Attachments ({ticket.attachments?.length || 0})
+                </h3>
+              </div>
+              <div className="card-body">
+                {!ticket.attachments || ticket.attachments.length === 0 ? (
+                  <div className="text-center py-3 text-muted small fst-italic">
+                    No attachments uploaded for this ticket.
+                  </div>
+                ) : (
+                  <div className="d-flex flex-column gap-2">
+                    {ticket.attachments.map((att) => (
+                      <div
+                        key={att.id}
+                        className={`p-3 rounded border d-flex justify-content-between align-items-center ${
+                          att.isRemoved ? "bg-light text-muted" : "bg-white"
+                        }`}
+                      >
+                        <div>
+                          <div className="d-flex align-items-center gap-2 mb-1">
+                            <strong className="small text-dark">{att.filename}</strong>
+                            <span className="text-muted extra-small">
+                              ({(att.fileSize / 1024).toFixed(1)} KB)
+                            </span>
+                            {att.isRemoved && (
+                              <span className="badge bg-danger text-white extra-small">
+                                Soft Removed
+                              </span>
+                            )}
+                          </div>
+                          {att.isRemoved && att.removalReason && (
+                            <div className="text-danger extra-small fst-italic">
+                              Reason: {att.removalReason}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="d-flex gap-2">
+                          {!att.isRemoved && (
+                            <>
+                              <a
+                                href={getAttachmentDownloadUrl(att.id)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-outline-secondary btn-sm text-decoration-none"
+                              >
+                                Download
+                              </a>
+                              <button
+                                type="button"
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={() => {
+                                  setRemovingAttachmentId(att.id);
+                                  setRemovalReason("");
+                                  setRemovalError("");
+                                }}
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar Controls Area */}
