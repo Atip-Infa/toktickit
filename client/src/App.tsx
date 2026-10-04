@@ -9,6 +9,7 @@ import { DevelopmentRequesterSelector } from "./components/DevelopmentRequesterS
 import { CreateTicketForm } from "./components/CreateTicketForm.js";
 import { MyTicketsView } from "./components/MyTicketsView.js";
 import { TicketDetailView } from "./components/TicketDetailView.js";
+import { RequesterDashboardView } from "./components/RequesterDashboardView.js";
 import { getAuthToken } from "./api.js";
 
 import { StaffTicketQueueView } from "./components/StaffTicketQueueView.js";
@@ -21,6 +22,7 @@ function MainApp() {
   const { selectedRequester } = useRequester();
   const [currentView, setCurrentView] = useState<string>("my-tickets");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [myTicketsStatusFilter, setMyTicketsStatusFilter] = useState<string>("");
   const [queueFilters, setQueueFilters] = useState<{ status?: string; ownerFilter?: string; priority?: string }>({});
   const [authMode, setAuthMode] = useState<"login" | "dev-selector">(() => {
     return getAuthToken() ? "login" : "dev-selector";
@@ -29,7 +31,7 @@ function MainApp() {
   useEffect(() => {
     if (user) {
       if (user.role === "REQUESTER") {
-        setCurrentView("my-tickets");
+        setCurrentView("requester-dashboard");
       } else if (user.role === "IT_STAFF" || user.role === "ADMINISTRATOR") {
         setCurrentView("staff-dashboard");
       }
@@ -65,8 +67,23 @@ function MainApp() {
       <AppHeader currentView={currentView} onNavigate={setCurrentView} />
 
       <main className="flex-grow-1">
+        {currentView === "requester-dashboard" && (
+          <RequesterDashboardView
+            onCreateTicketClick={() => setCurrentView("create-ticket")}
+            onSelectTicket={(ticketId) => {
+              setSelectedTicketId(ticketId);
+              setCurrentView("ticket-detail");
+            }}
+            onNavigateMyTickets={(statusFilter) => {
+              setMyTicketsStatusFilter(statusFilter || "");
+              setCurrentView("my-tickets");
+            }}
+          />
+        )}
+
         {currentView === "my-tickets" && (
           <MyTicketsView
+            initialStatus={myTicketsStatusFilter}
             onCreateTicketClick={() => setCurrentView("create-ticket")}
             onSelectTicket={(ticketId) => {
               setSelectedTicketId(ticketId);

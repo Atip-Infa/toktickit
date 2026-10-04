@@ -67,6 +67,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <>
               <button
                 className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
+                  currentView === "requester-dashboard" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
+                }`}
+                onClick={() => onNavigate("requester-dashboard")}
+              >
+                📊 Dashboard
+              </button>
+              <button
+                className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
                   currentView === "my-tickets" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
                 }`}
                 onClick={() => onNavigate("my-tickets")}

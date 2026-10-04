@@ -252,6 +252,20 @@ export interface StaffDashboardResponse {
   };
 }
 
+export interface RequesterDashboardResponse {
+  metrics: {
+    totalTickets: number;
+    openTickets: number;
+    inProgress: number;
+    waitingForRequester: number;
+    resolved: number;
+    closed: number;
+  };
+  recentTickets: Ticket[];
+  recentlyResolvedTickets?: Ticket[];
+  requiringAttention?: Ticket[];
+}
+
 export interface AdminUsersQueryParams {
   search?: string;
   role?: string;
@@ -633,6 +647,29 @@ export async function fetchStaffDashboard(): Promise<StaffDashboardResponse> {
   const json = await res.json();
   if (!res.ok) {
     throw new Error(json?.error || "Failed to fetch staff dashboard");
+  }
+
+  return json;
+}
+
+export async function fetchRequesterDashboard(
+  requesterId?: number
+): Promise<RequesterDashboardResponse> {
+  const customHeaders: Record<string, string> = {};
+  if (requesterId) {
+    customHeaders["X-Requester-Id"] = String(requesterId);
+  }
+
+  const query = requesterId ? `?requesterId=${requesterId}` : "";
+  const res = await fetch(`${API_URL}/api/requester/dashboard${query}`, {
+    headers: getAuthHeaders(customHeaders),
+  }).catch(() => {
+    throw new Error("Unable to connect to TokTickIT API");
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.error || "Failed to fetch requester dashboard");
   }
 
   return json;
