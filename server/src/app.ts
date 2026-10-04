@@ -697,9 +697,125 @@ const handleSoftRemove = async (req: Request, res: Response) => {
   }
 };
 
-// ---------------------------------------------------------------------------
-// IT Staff Ticket Queue & Workflow APIs (Lab 3)
-// ---------------------------------------------------------------------------
+// GET /api/staff/dashboard - Operational metrics for IT Staff & Administrators (Lab 4)
+app.get(
+  "/api/staff/dashboard",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("IT_STAFF", "ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const prisma = getPrisma();
+      const currentUserId = req.user!.id;
+
+      // Calculate ticket status counts directly from DB (BR-10, BR-11, FR-11, FR-13)
+      const [
+        newTickets,
+        openTickets,
+        inProgress,
+        waitingForRequester,
+        myAssigned,
+        unassignedTickets,
+        resolvedCount,
+        closedCount,
+        reopenedCount,
+        cancelledCount,
+        lowCount,
+        mediumCount,
+        highCount,
+        urgentCount,
+      ] = await Promise.all([
+        prisma.ticket.count({ where: { status: "NEW" } }),
+        prisma.ticket.count({ where: { status: "OPEN" } }),
+        prisma.ticket.count({ where: { status: "IN_PROGRESS" } }),
+        prisma.ticket.count({ where: { status: "WAITING_FOR_REQUESTER" } }),
+        prisma.ticket.count({
+          where: { ownerId: currentUserId, status: { notIn: ["CLOSED", "CANCELLED"] } },
+        }),
+        prisma.ticket.count({
+          where: { ownerId: null, status: { notIn: ["CLOSED", "CANCELLED"] } },
+        }),
+        prisma.ticket.count({ where: { status: "RESOLVED" } }),
+        prisma.ticket.count({ where: { status: "CLOSED" } }),
+        prisma.ticket.count({ where: { status: "REOPENED" } }),
+        prisma.ticket.count({ where: { status: "CANCELLED" } }),
+        prisma.ticket.count({ where: { itPriority: "LOW", status: { notIn: ["CLOSED", "CANCELLED"] } } }),
+        prisma.ticket.count({ where: { itPriority: "MEDIUM", status: { notIn: ["CLOSED", "CANCELLED"] } } }),
+        prisma.ticket.count({ where: { itPriority: "HIGH", status: { notIn: ["CLOSED", "CANCELLED"] } } }),
+        prisma.ticket.count({ where: { itPriority: "URGENT", status: { notIn: ["CLOSED", "CANCELLED"] } } }),
+      ]);
+
+      // Query recent tickets assigned to current staff user (up to 5), or overall recent if none assigned
+      let recentTickets = await prisma.ticket.findMany({
+        where: { ownerId: currentUserId },
+        take: 5,
+        orderBy: { updatedAt: "desc" },
+        include: {
+          requester: { select: { id: true, name: true, email: true, department: true } },
+          owner: { select: { id: true, name: true, email: true } },
+          category: { select: { id: true, name: true, code: true } },
+          relatedSystem: { select: { id: true, name: true, code: true } },
+        },
+      });
+
+      if (recentTickets.length === 0) {
+        recentTickets = await prisma.ticket.findMany({
+          take: 5,
+          orderBy: { updatedAt: "desc" },
+          include: {
+            requester: { select: { id: true, name: true, email: true, department: true } },
+            owner: { select: { id: true, name: true, email: true } },
+            category: { select: { id: true, name: true, code: true } },
+            relatedSystem: { select: { id: true, name: true, code: true } },
+          },
+        });
+      }
+
+      const quickStats: any = {
+        unassignedTickets,
+      };
+
+      if (req.user!.role === "ADMINISTRATOR") {
+        const [totalUsers, activeUsers] = await Promise.all([
+          prisma.user.count(),
+          prisma.user.count({ where: { isActive: true } }),
+        ]);
+        quickStats.totalUsers = totalUsers;
+        quickStats.activeUsers = activeUsers;
+      }
+
+      return res.status(200).json({
+        metrics: {
+          newTickets,
+          openTickets,
+          inProgress,
+          waitingForRequester,
+          myAssigned,
+          byStatus: {
+            NEW: newTickets,
+            OPEN: openTickets,
+            IN_PROGRESS: inProgress,
+            WAITING_FOR_REQUESTER: waitingForRequester,
+            RESOLVED: resolvedCount,
+            CLOSED: closedCount,
+            REOPENED: reopenedCount,
+            CANCELLED: cancelledCount,
+          },
+          byPriority: {
+            LOW: lowCount,
+            MEDIUM: mediumCount,
+            HIGH: highCount,
+            URGENT: urgentCount,
+          },
+        },
+        recentTickets,
+        quickStats,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: "Failed to fetch staff dashboard summary" });
+    }
+  }
+);
 
 // GET /api/staff/tickets - Query staff ticket queue with filters, sorting, and pagination
 app.get(
