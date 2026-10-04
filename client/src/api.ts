@@ -231,6 +231,7 @@ export interface UpdateStaffTicketInput {
   itPriority?: string;
   status?: string;
   resolutionSummary?: string;
+  expectedUpdatedAt?: string;
 }
 
 export interface AdminUsersQueryParams {

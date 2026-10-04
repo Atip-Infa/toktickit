@@ -815,6 +815,18 @@ app.patch(
         return res.status(404).json({ error: "Ticket not found" });
       }
 
+      // Concurrency / stale update check
+      if (req.body.expectedUpdatedAt) {
+        const expectedDate = new Date(req.body.expectedUpdatedAt).toISOString();
+        const currentDate = existing.updatedAt.toISOString();
+        if (expectedDate !== currentDate) {
+          return res.status(409).json({
+            error: "This ticket has been updated by another user. Please refresh and review before saving changes.",
+            code: "STALE_UPDATE_CONFLICT",
+          });
+        }
+      }
+
       const { ownerId, itPriority, status, resolutionSummary } = req.body;
 
       const dataToUpdate: any = {};
@@ -835,12 +847,14 @@ app.patch(
 
       if (itPriority) {
         if (!["LOW", "MEDIUM", "HIGH", "URGENT"].includes(itPriority)) {
-          return res.status(400).json({ error: "Invalid IT Priority" });
+          return res.status(400).json({ error: "Invalid IT Priority", code: "INVALID_INPUT" });
         }
         dataToUpdate.itPriority = itPriority;
       }
 
-      if (status && status !== existing.status) {
+      const targetStatus = status || dataToUpdate.status;
+
+      if (targetStatus && targetStatus !== existing.status) {
         const allowedTransitionsMap: Record<string, string[]> = {
           NEW: ["OPEN", "ASSIGNED", "IN_PROGRESS", "CANCELLED"],
           OPEN: ["IN_PROGRESS", "WAITING_FOR_REQUESTER", "PENDING_CLIENT", "CANCELLED"],
@@ -855,22 +869,40 @@ app.patch(
         };
 
         const allowed = allowedTransitionsMap[existing.status] || [];
-        if (!allowed.includes(status)) {
+        if (!allowed.includes(targetStatus)) {
           return res.status(400).json({
-            error: `Invalid status transition from ${existing.status} to ${status}`,
+            error: `Invalid status transition from ${existing.status} to ${targetStatus}`,
+            code: "INVALID_STATUS_TRANSITION",
           });
         }
 
-        if (
-          (status === "RESOLVED" || status === "CLOSED") &&
-          (!resolutionSummary || typeof resolutionSummary !== "string" || !resolutionSummary.trim())
-        ) {
+        dataToUpdate.status = targetStatus;
+      }
+
+      // Resolution Gate Check (BR-07, FR-07, FR-08, AC-05, AC-06, AC-07)
+      const finalStatus = dataToUpdate.status || existing.status;
+      if (finalStatus === "RESOLVED" || finalStatus === "CLOSED") {
+        const summaryText = resolutionSummary !== undefined
+          ? (typeof resolutionSummary === "string" ? resolutionSummary.trim() : "")
+          : (existing.resolutionSummary ? existing.resolutionSummary.trim() : "");
+
+        if (!summaryText) {
           return res.status(400).json({
             error: "Resolution summary is required when resolving or closing a ticket",
+            code: "RESOLUTION_GATE_FAILED",
           });
         }
 
-        dataToUpdate.status = status;
+        const actionsCount = await prisma.actionTaken.count({
+          where: { ticketId },
+        });
+
+        if (actionsCount === 0) {
+          return res.status(400).json({
+            error: "Cannot resolve ticket: At least one Action Taken record and a Resolution Summary are required before resolving or closing a ticket",
+            code: "RESOLUTION_GATE_FAILED",
+          });
+        }
       }
 
       if (resolutionSummary !== undefined) {
@@ -1142,39 +1174,6 @@ app.post(
   }
 );
 
-// POST /api/tickets/:id/resolve (Requester mark problem resolved)
-app.post(
-  "/api/tickets/:id/resolve",
-  requireAuth,
-  requirePasswordChanged,
-  async (req: Request, res: Response) => {
-    try {
-      const ticketId = Number(req.params.id);
-      if (!ticketId || isNaN(ticketId)) {
-        return res.status(400).json({ error: "Invalid ticket ID" });
-      }
-
-      const prisma = getPrisma();
-      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
-      if (!ticket) {
-        return res.status(404).json({ error: "Ticket not found" });
-      }
-
-      if (req.user!.role === "REQUESTER" && ticket.requesterId !== req.user!.id) {
-        return res.status(403).json({ error: "Access denied to resolve this ticket" });
-      }
-
-      const updated = await prisma.ticket.update({
-        where: { id: ticketId },
-        data: { status: "RESOLVED" },
-      });
-
-      return res.status(200).json({ data: updated });
-    } catch {
-      return res.status(500).json({ error: "Failed to resolve ticket" });
-    }
-  }
-);
 
 // ---------------------------------------------------------------------------
 // Actions Taken APIs (Lab 4)

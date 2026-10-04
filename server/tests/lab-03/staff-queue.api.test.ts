@@ -104,6 +104,16 @@ describe("Lab 3 IT Staff Queue & Ticket Workflow APIs", () => {
 
     it("allows IT_STAFF to resolve ticket with resolution summary", async () => {
       const targetId = sampleTicketId || 1;
+      const staffUser = await prisma.user.findUnique({ where: { email: "michael@toktickit.com" } });
+      await prisma.actionTaken.create({
+        data: {
+          ticketId: targetId,
+          performedById: staffUser!.id,
+          description: "Replaced hardware component.",
+          result: "Hardware replaced successfully",
+        },
+      });
+
       const res = await request(app)
         .patch(`/api/staff/tickets/${targetId}`)
         .set("Authorization", `Bearer ${staffToken}`)
