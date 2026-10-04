@@ -227,9 +227,116 @@ app.get("/api/related-systems", async (_req: Request, res: Response) => {
         isActive: true,
       },
     });
-    res.status(200).json({ data: systems });
+    return res.status(200).json({ data: systems });
   } catch {
-    res.status(500).json({ error: "Failed to fetch Related Systems" });
+    return res.status(500).json({ error: "Failed to fetch Related Systems" });
+  }
+});
+
+// GET /api/requester/dashboard - Summarized metrics and recent tickets for authenticated Requester (Lab 4)
+app.get("/api/requester/dashboard", async (req: Request, res: Response) => {
+  try {
+    if (req.user && req.user.mustChangePassword) {
+      return res.status(403).json({ error: "Mandatory password change required", code: "MUST_CHANGE_PASSWORD" });
+    }
+
+    let requesterId: number | undefined;
+
+    if (req.user) {
+      if (req.user.role === "REQUESTER") {
+        requesterId = req.user.id; // Strictly enforce ownership
+      } else {
+        const paramId = Number(req.query.requesterId || req.headers["x-requester-id"]);
+        if (paramId && !isNaN(paramId)) {
+          requesterId = paramId;
+        } else {
+          return res.status(403).json({ error: "Access denied. Requester role required.", code: "FORBIDDEN" });
+        }
+      }
+    } else {
+      // Dev mode with X-Requester-Id
+      const paramId = Number(req.query.requesterId || req.headers["x-requester-id"]);
+      if (paramId && !isNaN(paramId)) {
+        requesterId = paramId;
+      }
+    }
+
+    if (!requesterId || isNaN(requesterId)) {
+      return res.status(401).json({ error: "Authentication or valid Requester context required", code: "UNAUTHORIZED" });
+    }
+
+    const prisma = getPrisma();
+
+    // Authoritative metric calculations for currentUser / requesterId (BR-09, FR-10, FR-13)
+    const [
+      totalTickets,
+      openTickets,
+      inProgress,
+      waitingForRequester,
+      resolved,
+      closed,
+      recentTickets,
+      recentlyResolvedTickets,
+      requiringAttention,
+    ] = await Promise.all([
+      prisma.ticket.count({ where: { requesterId } }),
+      prisma.ticket.count({
+        where: {
+          requesterId,
+          status: { in: ["NEW", "OPEN", "IN_PROGRESS", "WAITING_FOR_REQUESTER", "REOPENED"] },
+        },
+      }),
+      prisma.ticket.count({ where: { requesterId, status: "IN_PROGRESS" } }),
+      prisma.ticket.count({ where: { requesterId, status: "WAITING_FOR_REQUESTER" } }),
+      prisma.ticket.count({ where: { requesterId, status: "RESOLVED" } }),
+      prisma.ticket.count({ where: { requesterId, status: "CLOSED" } }),
+      prisma.ticket.findMany({
+        where: { requesterId },
+        take: 5,
+        orderBy: { updatedAt: "desc" },
+        include: {
+          category: { select: { id: true, name: true, code: true } },
+          relatedSystem: { select: { id: true, name: true, code: true } },
+          owner: { select: { id: true, name: true, email: true } },
+        },
+      }),
+      prisma.ticket.findMany({
+        where: { requesterId, status: "RESOLVED" },
+        take: 5,
+        orderBy: { updatedAt: "desc" },
+        include: {
+          category: { select: { id: true, name: true, code: true } },
+          relatedSystem: { select: { id: true, name: true, code: true } },
+          owner: { select: { id: true, name: true, email: true } },
+        },
+      }),
+      prisma.ticket.findMany({
+        where: { requesterId, status: "WAITING_FOR_REQUESTER" },
+        take: 5,
+        orderBy: { updatedAt: "desc" },
+        include: {
+          category: { select: { id: true, name: true, code: true } },
+          relatedSystem: { select: { id: true, name: true, code: true } },
+          owner: { select: { id: true, name: true, email: true } },
+        },
+      }),
+    ]);
+
+    return res.status(200).json({
+      metrics: {
+        totalTickets,
+        openTickets,
+        inProgress,
+        waitingForRequester,
+        resolved,
+        closed,
+      },
+      recentTickets,
+      recentlyResolvedTickets,
+      requiringAttention,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: "Failed to fetch requester dashboard summary" });
   }
 });
 
