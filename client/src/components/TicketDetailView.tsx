@@ -11,6 +11,7 @@ import {
 import { useRequester } from "../context/RequesterContext.js";
 import { useAuth } from "../context/AuthContext.js";
 import { PublicCommentsSection } from "./PublicCommentsSection.js";
+import { ActionsTakenSection } from "./ActionsTakenSection.js";
 
 interface TicketDetailViewProps {
   ticketId: number;
@@ -436,6 +437,9 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
           )}
         </div>
       </div>
+
+      {/* Actions Taken Section */}
+      {ticket && <ActionsTakenSection ticketId={ticket.id} />}
 
       {/* Public Comments */}
       {ticket && <PublicCommentsSection ticketId={ticket.id} />}

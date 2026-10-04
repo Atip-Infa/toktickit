@@ -91,6 +91,45 @@ export interface Attachment {
   removalReason?: string | null;
 }
 
+export interface ActionTaken {
+  id: number;
+  ticketId: number;
+  actionDate: string;
+  description: string;
+  result: string;
+  performedById: number;
+  performedBy: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+  };
+  followUpRequired: boolean;
+  followUpNote?: string | null;
+  attachmentNotes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateActionTakenInput {
+  description: string;
+  result: string;
+  followUpRequired?: boolean;
+  followUpNote?: string;
+  attachmentNotes?: string;
+  actionDate?: string;
+}
+
+export interface UpdateActionTakenInput {
+  description?: string;
+  result?: string;
+  followUpRequired?: boolean;
+  followUpNote?: string;
+  attachmentNotes?: string;
+  actionDate?: string;
+  expectedUpdatedAt?: string;
+}
+
 export interface Ticket {
   id: number;
   ticketNumber: string;
@@ -738,4 +777,64 @@ export async function resetAdminUserPassword(
   }
 
   return json;
+}
+
+// ---------------------------------------------------------------------------
+// Lab 4 Actions Taken API Functions
+// ---------------------------------------------------------------------------
+
+export async function fetchActionsTaken(ticketId: number): Promise<ActionTaken[]> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/actions-taken`, {
+    headers: getAuthHeaders(),
+  }).catch(() => {
+    throw new Error("Unable to connect to TokTickIT API");
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.error || "Failed to fetch actions taken");
+  }
+
+  return json.actionsTaken || json.data || [];
+}
+
+export async function createActionTaken(
+  ticketId: number,
+  input: CreateActionTakenInput
+): Promise<ActionTaken> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/actions-taken`, {
+    method: "POST",
+    headers: getAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(input),
+  }).catch(() => {
+    throw new Error("Unable to connect to TokTickIT API");
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.error || "Failed to create action taken");
+  }
+
+  return json.actionTaken || json.data;
+}
+
+export async function updateActionTaken(
+  ticketId: number,
+  actionId: number,
+  input: UpdateActionTakenInput
+): Promise<ActionTaken> {
+  const res = await fetch(`${API_URL}/api/tickets/${ticketId}/actions-taken/${actionId}`, {
+    method: "PATCH",
+    headers: getAuthHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(input),
+  }).catch(() => {
+    throw new Error("Unable to connect to TokTickIT API");
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.error || "Failed to update action taken");
+  }
+
+  return json.actionTaken || json.data;
 }
