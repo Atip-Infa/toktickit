@@ -85,14 +85,24 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           )}
 
           {(activeRole === "IT_STAFF" || activeRole === "ADMINISTRATOR") && (
-            <button
-              className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
-                currentView === "staff-queue" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
-              }`}
-              onClick={() => onNavigate("staff-queue")}
-            >
-              📋 IT Ticket Queue
-            </button>
+            <>
+              <button
+                className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
+                  currentView === "staff-dashboard" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
+                }`}
+                onClick={() => onNavigate("staff-dashboard")}
+              >
+                📊 Dashboard
+              </button>
+              <button
+                className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
+                  currentView === "staff-queue" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
+                }`}
+                onClick={() => onNavigate("staff-queue")}
+              >
+                📋 IT Ticket Queue
+              </button>
+            </>
           )}
 
           {activeRole === "ADMINISTRATOR" && (

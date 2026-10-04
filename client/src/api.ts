@@ -234,6 +234,24 @@ export interface UpdateStaffTicketInput {
   expectedUpdatedAt?: string;
 }
 
+export interface StaffDashboardResponse {
+  metrics: {
+    newTickets: number;
+    openTickets: number;
+    inProgress: number;
+    waitingForRequester: number;
+    myAssigned: number;
+    byStatus?: Record<string, number>;
+    byPriority?: Record<string, number>;
+  };
+  recentTickets: Ticket[];
+  quickStats: {
+    unassignedTickets: number;
+    totalUsers?: number;
+    activeUsers?: number;
+  };
+}
+
 export interface AdminUsersQueryParams {
   search?: string;
   role?: string;
@@ -603,6 +621,21 @@ export async function updateStaffTicket(
   }
 
   return json.data;
+}
+
+export async function fetchStaffDashboard(): Promise<StaffDashboardResponse> {
+  const res = await fetch(`${API_URL}/api/staff/dashboard`, {
+    headers: getAuthHeaders(),
+  }).catch(() => {
+    throw new Error("Unable to connect to TokTickIT API");
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json?.error || "Failed to fetch staff dashboard");
+  }
+
+  return json;
 }
 
 // ---------------------------------------------------------------------------

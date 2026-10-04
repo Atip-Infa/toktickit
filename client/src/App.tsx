@@ -13,6 +13,7 @@ import { getAuthToken } from "./api.js";
 
 import { StaffTicketQueueView } from "./components/StaffTicketQueueView.js";
 import { StaffTicketDetailView } from "./components/StaffTicketDetailView.js";
+import { StaffDashboardView } from "./components/StaffDashboardView.js";
 import { UserManagementView } from "./components/UserManagementView.js";
 
 function MainApp() {
@@ -20,6 +21,7 @@ function MainApp() {
   const { selectedRequester } = useRequester();
   const [currentView, setCurrentView] = useState<string>("my-tickets");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [queueFilters, setQueueFilters] = useState<{ status?: string; ownerFilter?: string; priority?: string }>({});
   const [authMode, setAuthMode] = useState<"login" | "dev-selector">(() => {
     return getAuthToken() ? "login" : "dev-selector";
   });
@@ -28,10 +30,8 @@ function MainApp() {
     if (user) {
       if (user.role === "REQUESTER") {
         setCurrentView("my-tickets");
-      } else if (user.role === "IT_STAFF") {
-        setCurrentView("staff-queue");
-      } else if (user.role === "ADMINISTRATOR") {
-        setCurrentView("user-management");
+      } else if (user.role === "IT_STAFF" || user.role === "ADMINISTRATOR") {
+        setCurrentView("staff-dashboard");
       }
     }
   }, [user?.role]);
@@ -89,8 +89,24 @@ function MainApp() {
           />
         )}
 
+        {currentView === "staff-dashboard" && (
+          <StaffDashboardView
+            onSelectTicket={(ticketId) => {
+              setSelectedTicketId(ticketId);
+              setCurrentView("staff-ticket-detail");
+            }}
+            onNavigateQueue={(filters) => {
+              setQueueFilters(filters || {});
+              setCurrentView("staff-queue");
+            }}
+          />
+        )}
+
         {currentView === "staff-queue" && (
           <StaffTicketQueueView
+            initialStatus={queueFilters.status || ""}
+            initialOwnerFilter={queueFilters.ownerFilter || ""}
+            initialPriority={queueFilters.priority || ""}
             onSelectTicket={(ticketId) => {
               setSelectedTicketId(ticketId);
               setCurrentView("staff-ticket-detail");

@@ -10,9 +10,17 @@ import { useAuth } from "../context/AuthContext.js";
 
 interface StaffTicketQueueViewProps {
   onSelectTicket: (ticketId: number) => void;
+  initialStatus?: string;
+  initialOwnerFilter?: string;
+  initialPriority?: string;
 }
 
-export const StaffTicketQueueView: React.FC<StaffTicketQueueViewProps> = ({ onSelectTicket }) => {
+export const StaffTicketQueueView: React.FC<StaffTicketQueueViewProps> = ({
+  onSelectTicket,
+  initialStatus = "",
+  initialOwnerFilter = "",
+  initialPriority = "",
+}) => {
   const { user } = useAuth();
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -23,9 +31,9 @@ export const StaffTicketQueueView: React.FC<StaffTicketQueueViewProps> = ({ onSe
   // Filters
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedPriority, setSelectedPriority] = useState<string>("");
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
-  const [ownerFilter, setOwnerFilter] = useState<string>(""); // "", "unassigned", "me"
+  const [selectedPriority, setSelectedPriority] = useState<string>(initialPriority);
+  const [selectedStatus, setSelectedStatus] = useState<string>(initialStatus);
+  const [ownerFilter, setOwnerFilter] = useState<string>(initialOwnerFilter); // "", "unassigned", "me"
   const [sortBy, setSortBy] = useState<string>("createdAt");
   const [sortOrder, setSortOrder] = useState<string>("desc");
   const [page, setPage] = useState<number>(1);
