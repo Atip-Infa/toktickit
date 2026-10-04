@@ -163,7 +163,7 @@ async function main() {
     });
   }
 
-  // 5. Seed Realistic Tickets
+  // 5. Seed Realistic Tickets (covering statuses, priorities, assigned/unassigned)
   const sampleTickets = [
     {
       ticketNumber: "TXT-2025-001234",
@@ -176,6 +176,26 @@ async function main() {
       ownerEmail: "michael@toktickit.com",
       summary: "Laptop battery drains quickly",
       description: "My laptop battery is draining much faster than usual even when idle. This started after last week's Windows update.",
+      actionsTaken: [
+        {
+          performedByEmail: "michael@toktickit.com",
+          actionDate: new Date("2025-05-12T10:30:00Z"),
+          description: "Ran diagnostic battery health check and verified power adapter output voltage.",
+          result: "Battery capacity verified degraded at 42% design capacity.",
+          followUpRequired: true,
+          followUpNote: "Replacement OEM battery pack ordered under hardware warranty (ETA 24 hours).",
+          attachmentNotes: "Refer to battery_diagnostic_log.png in attachments.",
+        },
+        {
+          performedByEmail: "lisa@toktickit.com", // Action by different staff member than owner!
+          actionDate: new Date("2025-05-13T14:15:00Z"),
+          description: "Received replacement battery package from vendor receiving bay and logged item serial number.",
+          result: "New battery pack unpacked and prepped for technician installation.",
+          followUpRequired: false,
+          followUpNote: null,
+          attachmentNotes: null,
+        },
+      ],
     },
     {
       ticketNumber: "TXT-2025-001233",
@@ -188,6 +208,17 @@ async function main() {
       ownerEmail: "lisa@toktickit.com",
       summary: "Cannot connect to VPN",
       description: "VPN client fails to authenticate when trying to connect from off-campus network.",
+      actionsTaken: [
+        {
+          performedByEmail: "lisa@toktickit.com",
+          actionDate: new Date("2025-05-11T09:15:00Z"),
+          description: "Checked radius server authentication logs for user account and verified gateway IP routing tables.",
+          result: "Identified stale session token lock on primary gateway node; reset session state.",
+          followUpRequired: true,
+          followUpNote: "User requested to re-verify connection from home network during evening shift.",
+          attachmentNotes: null,
+        },
+      ],
     },
     {
       ticketNumber: "TXT-2025-001232",
@@ -200,6 +231,17 @@ async function main() {
       ownerEmail: "michael@toktickit.com",
       summary: "Email not syncing on mobile",
       description: "Corporate email app stopped syncing on my phone after updating to iOS 18.",
+      actionsTaken: [
+        {
+          performedByEmail: "michael@toktickit.com",
+          actionDate: new Date("2025-05-13T08:30:00Z"),
+          description: "Reconfigured Exchange ActiveSync policy profile and pushed updated SSL certificate trust payload.",
+          result: "Device initiated initial mailbox handshake.",
+          followUpRequired: false,
+          followUpNote: null,
+          attachmentNotes: null,
+        },
+      ],
     },
     {
       ticketNumber: "TXT-2025-001231",
@@ -213,6 +255,26 @@ async function main() {
       summary: "New employee setup request",
       description: "Please provision account access for our new departmental TA.",
       resolutionSummary: "Access granted and welcome email dispatched with temporary credentials.",
+      actionsTaken: [
+        {
+          performedByEmail: "lisa@toktickit.com",
+          actionDate: new Date("2025-05-10T11:00:00Z"),
+          description: "Created Active Directory user account and assigned departmental security groups.",
+          result: "User account created successfully.",
+          followUpRequired: false,
+          followUpNote: null,
+          attachmentNotes: null,
+        },
+        {
+          performedByEmail: "amanda@toktickit.com",
+          actionDate: new Date("2025-05-10T13:30:00Z"),
+          description: "Provisioned Grade Submission App role permissions and issued temporary credentials envelope.",
+          result: "Permissions active and onboarding notification email sent.",
+          followUpRequired: false,
+          followUpNote: null,
+          attachmentNotes: null,
+        },
+      ],
     },
     {
       ticketNumber: "TXT-2025-001230",
@@ -222,9 +284,10 @@ async function main() {
       requestedPriority: "MEDIUM" as const,
       itPriority: "LOW" as const,
       status: "OPEN" as const,
-      ownerEmail: null,
+      ownerEmail: null, // Unassigned ticket
       summary: "Printer keeps showing offline",
       description: "Shared printer on 3rd floor intermittently drops off the local network.",
+      actionsTaken: [], // Zero Actions Taken
     },
     {
       ticketNumber: "TXT-2025-001229",
@@ -237,6 +300,63 @@ async function main() {
       ownerEmail: "amanda@toktickit.com",
       summary: "Request access to SharePoint repository",
       description: "Need read access to team project documentation folder.",
+      actionsTaken: [
+        {
+          performedByEmail: "amanda@toktickit.com",
+          actionDate: new Date("2025-05-09T15:45:00Z"),
+          description: "Sent permissions approval request to department manager for sign-off.",
+          result: "Awaiting manager approval confirmation from requester.",
+          followUpRequired: true,
+          followUpNote: "Follow up if no reply received within 48 hours.",
+          attachmentNotes: null,
+        },
+      ],
+    },
+    {
+      ticketNumber: "TXT-2025-001228",
+      requesterEmail: "david@toktickit.com",
+      categoryName: "Hardware",
+      systemName: "Corporate Laptop",
+      requestedPriority: "URGENT" as const,
+      itPriority: "URGENT" as const,
+      status: "NEW" as const,
+      ownerEmail: null, // Unassigned ticket with NEW status
+      summary: "Laptop screen flickering violently",
+      description: "Display backlight turns off intermittently making laptop unusable.",
+      actionsTaken: [], // Zero Actions Taken
+    },
+    {
+      ticketNumber: "TXT-2025-001227",
+      requesterEmail: "jennifer@toktickit.com",
+      categoryName: "Network",
+      systemName: "Campus Wi-Fi",
+      requestedPriority: "MEDIUM" as const,
+      itPriority: "MEDIUM" as const,
+      status: "CLOSED" as const,
+      ownerEmail: "michael@toktickit.com",
+      summary: "Unable to authenticate on Campus Wi-Fi",
+      description: "Keeps showing invalid credential error.",
+      resolutionSummary: "Updated 802.1X certificate trust on user device.",
+      actionsTaken: [
+        {
+          performedByEmail: "michael@toktickit.com",
+          actionDate: new Date("2025-05-01T10:00:00Z"),
+          description: "Inspected Wi-Fi profile configuration on user laptop.",
+          result: "Discovered expired root CA certificate.",
+          followUpRequired: false,
+          followUpNote: null,
+          attachmentNotes: null,
+        },
+        {
+          performedByEmail: "michael@toktickit.com",
+          actionDate: new Date("2025-05-01T11:30:00Z"),
+          description: "Installed updated campus root CA certificate and reconnected.",
+          result: "Wi-Fi connected successfully with full throughput.",
+          followUpRequired: false,
+          followUpNote: null,
+          attachmentNotes: null,
+        },
+      ],
     },
   ];
 
@@ -276,6 +396,28 @@ async function main() {
         resolutionSummary: t.resolutionSummary || null,
       },
     });
+
+    // Seed Actions Taken for ticket
+    const existingActionCount = await prisma.actionTaken.count({ where: { ticketId: ticketObj.id } });
+    if (existingActionCount === 0 && t.actionsTaken && t.actionsTaken.length > 0) {
+      for (const actionItem of t.actionsTaken) {
+        const performer = createdUsers[actionItem.performedByEmail];
+        if (performer) {
+          await prisma.actionTaken.create({
+            data: {
+              ticketId: ticketObj.id,
+              performedById: performer.id,
+              actionDate: actionItem.actionDate,
+              description: actionItem.description,
+              result: actionItem.result,
+              followUpRequired: actionItem.followUpRequired,
+              followUpNote: actionItem.followUpNote,
+              attachmentNotes: actionItem.attachmentNotes,
+            },
+          });
+        }
+      }
+    }
 
     // 6. Seed Public Comments & Internal Notes for TXT-2025-001234
     if (t.ticketNumber === "TXT-2025-001234") {
@@ -334,11 +476,14 @@ async function main() {
     }
   }
 
-  console.log("Successfully seeded Lab 3 Database Increment:");
+  console.log("Successfully seeded Lab 4 Database Foundation:");
   console.log("- 4 Active Requesters, 1 Inactive Requester");
   console.log("- 3 Active IT Staff, 1 Inactive IT Staff");
   console.log("- 1 Active Administrator");
-  console.log("- Realistic Tickets across statuses, priorities, assigned/unassigned");
+  console.log("- Realistic Tickets across statuses (NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER, RESOLVED, CLOSED)");
+  console.log("- Unassigned and assigned tickets across priorities (LOW, MEDIUM, HIGH, URGENT)");
+  console.log("- Tickets with zero (0), one (1), and multiple (>1) Actions Taken");
+  console.log("- Actions performed by primary owner and different IT Staff members");
   console.log("- Public Comments and Internal Notes seeded cleanly.");
 }
 
