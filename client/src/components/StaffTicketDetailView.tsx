@@ -549,17 +549,21 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
 
       {/* Soft Removal Modal */}
       {removingAttachmentId && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog" aria-modal="true" aria-labelledby="staff-removal-modal-title">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content zen-card border-0 p-4">
-              <h2 className="h5 fw-bold mb-2">Remove Attachment</h2>
+              <h2 id="staff-removal-modal-title" className="h5 fw-bold mb-2">Remove Attachment</h2>
               <p className="text-muted small mb-3">
                 Specify a reason for soft-removing this attachment.
               </p>
 
               {removalError && <div className="alert alert-danger py-2 small mb-2">{removalError}</div>}
 
+              <label htmlFor="staff-removal-reason-input" className="form-label fw-semibold small mb-1">
+                Removal Reason <span className="text-danger">*</span>
+              </label>
               <textarea
+                id="staff-removal-reason-input"
                 className="form-control zen-form-control mb-3"
                 rows={3}
                 placeholder="Reason for removal (min 3 characters)..."

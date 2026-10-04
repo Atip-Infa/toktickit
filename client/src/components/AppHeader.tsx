@@ -45,6 +45,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     <header
       className="navbar navbar-expand-lg navbar-dark shadow-sm px-3 px-lg-4"
       style={{ backgroundColor: "#055037" }}
+      role="banner"
     >
       <div className="container-fluid px-0">
         {/* Brand Logo & Name */}
@@ -55,6 +56,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             else if (activeRole === "IT_STAFF") onNavigate("staff-queue");
             else if (activeRole === "ADMINISTRATOR") onNavigate("user-management");
           }}
+          aria-label="TokTickIT Homepage"
           style={{ cursor: "pointer" }}
         >
           <span className="fs-4">⏱️</span>
@@ -62,13 +64,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </button>
 
         {/* Role-Based Navigation Links */}
-        <div className="d-flex align-items-center gap-2 me-auto">
+        <nav className="d-flex align-items-center gap-2 me-auto flex-wrap" aria-label="Main Navigation">
           {activeRole === "REQUESTER" && (
             <>
               <button
                 className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
                   currentView === "requester-dashboard" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
                 }`}
+                aria-current={currentView === "requester-dashboard" ? "page" : undefined}
                 onClick={() => onNavigate("requester-dashboard")}
               >
                 📊 Dashboard
@@ -77,6 +80,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
                   currentView === "my-tickets" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
                 }`}
+                aria-current={currentView === "my-tickets" ? "page" : undefined}
                 onClick={() => onNavigate("my-tickets")}
               >
                 📋 My Tickets
@@ -85,6 +89,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
                   currentView === "create-ticket" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
                 }`}
+                aria-current={currentView === "create-ticket" ? "page" : undefined}
                 onClick={() => onNavigate("create-ticket")}
               >
                 ➕ Create Ticket
@@ -98,6 +103,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
                   currentView === "staff-dashboard" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
                 }`}
+                aria-current={currentView === "staff-dashboard" ? "page" : undefined}
                 onClick={() => onNavigate("staff-dashboard")}
               >
                 📊 Dashboard
@@ -106,6 +112,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
                   currentView === "staff-queue" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
                 }`}
+                aria-current={currentView === "staff-queue" ? "page" : undefined}
                 onClick={() => onNavigate("staff-queue")}
               >
                 📋 IT Ticket Queue
@@ -118,12 +125,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               className={`btn btn-sm px-3 rounded-pill text-white fw-medium ${
                 currentView === "user-management" ? "bg-white bg-opacity-25" : "btn-link text-decoration-none opacity-75 hover-opacity-100"
               }`}
+              aria-current={currentView === "user-management" ? "page" : undefined}
               onClick={() => onNavigate("user-management")}
             >
               👥 User Management
             </button>
           )}
-        </div>
+        </nav>
 
         {/* User Identity Profile & Logout / Dev Requester Dropdown */}
         {user ? (
