@@ -48,6 +48,7 @@ export const UserManagementView: React.FC = () => {
   // Form states - Reset Password
   const [newPassword, setNewPassword] = useState<string>("Password123!");
   const [resetError, setResetError] = useState<string>("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -89,6 +90,7 @@ export const UserManagementView: React.FC = () => {
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     setCreateError("");
 
     if (!createName.trim() || !createEmail.trim()) {
@@ -96,6 +98,7 @@ export const UserManagementView: React.FC = () => {
       return;
     }
 
+    setSubmitting(true);
     try {
       await createAdminUser({
         name: createName.trim(),
@@ -114,6 +117,8 @@ export const UserManagementView: React.FC = () => {
       loadUsers();
     } catch (err: any) {
       setCreateError(err?.message || "Failed to create user");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -129,7 +134,7 @@ export const UserManagementView: React.FC = () => {
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingUser) return;
+    if (!editingUser || submitting) return;
     setEditError("");
 
     if (!editName.trim() || !editEmail.trim()) {
@@ -137,6 +142,7 @@ export const UserManagementView: React.FC = () => {
       return;
     }
 
+    setSubmitting(true);
     try {
       await updateAdminUser(editingUser.id, {
         name: editName.trim(),
@@ -151,14 +157,17 @@ export const UserManagementView: React.FC = () => {
       loadUsers();
     } catch (err: any) {
       setEditError(err?.message || "Failed to update user");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleResetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resettingUser) return;
+    if (!resettingUser || submitting) return;
     setResetError("");
 
+    setSubmitting(true);
     try {
       await resetAdminUserPassword(resettingUser.id, newPassword.trim());
       setResettingUser(null);
@@ -167,6 +176,8 @@ export const UserManagementView: React.FC = () => {
       loadUsers();
     } catch (err: any) {
       setResetError(err?.message || "Failed to reset password");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -574,11 +585,12 @@ export const UserManagementView: React.FC = () => {
                     type="button"
                     className="btn zen-btn-secondary"
                     onClick={() => setShowCreateModal(false)}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn zen-btn-primary">
-                    Create User
+                  <button type="submit" className="btn zen-btn-primary" disabled={submitting}>
+                    {submitting ? "Creating..." : "Create User"}
                   </button>
                 </div>
               </form>
@@ -606,6 +618,7 @@ export const UserManagementView: React.FC = () => {
                     required
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
+                    disabled={submitting}
                   />
                 </div>
 
@@ -617,6 +630,7 @@ export const UserManagementView: React.FC = () => {
                     required
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
+                    disabled={submitting}
                   />
                 </div>
 
@@ -626,6 +640,7 @@ export const UserManagementView: React.FC = () => {
                     <select
                       className="form-select zen-form-control"
                       value={editRole}
+                      disabled={submitting}
                       onChange={(e) =>
                         setEditRole(e.target.value as "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR")
                       }
@@ -641,6 +656,7 @@ export const UserManagementView: React.FC = () => {
                       type="text"
                       className="form-control zen-form-control"
                       value={editDepartment}
+                      disabled={submitting}
                       onChange={(e) => setEditDepartment(e.target.value)}
                     />
                   </div>
@@ -652,7 +668,7 @@ export const UserManagementView: React.FC = () => {
                     type="checkbox"
                     id="activeSwitch"
                     checked={editIsActive}
-                    disabled={currentAdmin?.id === editingUser.id}
+                    disabled={currentAdmin?.id === editingUser.id || submitting}
                     onChange={(e) => setEditIsActive(e.target.checked)}
                   />
                   <label className="form-check-label fw-semibold small" htmlFor="activeSwitch">
@@ -670,11 +686,12 @@ export const UserManagementView: React.FC = () => {
                     type="button"
                     className="btn zen-btn-secondary"
                     onClick={() => setEditingUser(null)}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn zen-btn-primary">
-                    Save Changes
+                  <button type="submit" className="btn zen-btn-primary" disabled={submitting}>
+                    {submitting ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </form>
@@ -704,6 +721,7 @@ export const UserManagementView: React.FC = () => {
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={submitting}
                   />
                   <div className="text-muted extra-small mt-1">
                     Resetting sets <code>mustChangePassword: true</code> so user changes password on next login.
@@ -715,11 +733,12 @@ export const UserManagementView: React.FC = () => {
                     type="button"
                     className="btn zen-btn-secondary"
                     onClick={() => setResettingUser(null)}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-danger">
-                    Confirm Reset
+                  <button type="submit" className="btn btn-danger" disabled={submitting}>
+                    {submitting ? "Resetting..." : "Confirm Reset"}
                   </button>
                 </div>
               </form>
