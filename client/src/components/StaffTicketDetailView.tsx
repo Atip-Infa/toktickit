@@ -95,6 +95,7 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
         status,
         ownerId: ownerParam,
         resolutionSummary: status === "RESOLVED" || status === "CLOSED" ? resolutionSummary : undefined,
+        expectedUpdatedAt: ticket?.updatedAt,
       });
 
       setTicket(updated);
@@ -427,8 +428,9 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
             <form onSubmit={handleSaveChanges}>
               {/* IT Priority */}
               <div className="mb-3">
-                <label className="form-label fw-semibold small mb-1">IT Priority</label>
+                <label htmlFor="staffItPrioritySelect" className="form-label fw-semibold small mb-1">IT Priority</label>
                 <select
+                  id="staffItPrioritySelect"
                   className="form-select zen-form-control form-select-sm"
                   value={itPriority}
                   onChange={(e) => setItPriority(e.target.value)}
@@ -445,8 +447,9 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
 
               {/* Status Transition */}
               <div className="mb-3">
-                <label className="form-label fw-semibold small mb-1">Ticket Status</label>
+                <label htmlFor="staffTicketStatusSelect" className="form-label fw-semibold small mb-1">Ticket Status</label>
                 <select
+                  id="staffTicketStatusSelect"
                   className="form-select zen-form-control form-select-sm"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
@@ -493,14 +496,17 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
               {/* Resolution Summary (Required when Resolving) */}
               {(status === "RESOLVED" || status === "CLOSED") && (
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Resolution Summary</label>
+                  <label className="form-label fw-semibold small mb-1">Resolution Summary <span className="text-danger">*</span></label>
                   <textarea
-                    className="form-control zen-form-control form-control-sm"
+                    className="form-control zen-form-control form-control-sm mb-1"
                     rows={3}
                     placeholder="Describe how the problem was resolved..."
                     value={resolutionSummary}
                     onChange={(e) => setResolutionSummary(e.target.value)}
                   />
+                  <div className="text-muted extra-small">
+                    ℹ️ Resolution requires a non-empty summary and at least 1 Action Taken record.
+                  </div>
                 </div>
               )}
 
