@@ -182,9 +182,11 @@ export const RequesterDashboardView: React.FC<RequesterDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateMyTickets()}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateMyTickets(); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #055037" }}
             role="button"
             tabIndex={0}
+            aria-label={`Total Tickets: ${metrics.totalTickets}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">Total Tickets</div>
             <div className="display-6 fw-bold text-dark mb-1">{metrics.totalTickets}</div>
@@ -197,9 +199,11 @@ export const RequesterDashboardView: React.FC<RequesterDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateMyTickets("OPEN")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateMyTickets("OPEN"); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #0d6efd" }}
             role="button"
             tabIndex={0}
+            aria-label={`Open Tickets: ${metrics.openTickets}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">Open Tickets</div>
             <div className="display-6 fw-bold text-primary mb-1">{metrics.openTickets}</div>
@@ -212,9 +216,11 @@ export const RequesterDashboardView: React.FC<RequesterDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateMyTickets("WAITING_FOR_REQUESTER")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateMyTickets("WAITING_FOR_REQUESTER"); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #ffc107" }}
             role="button"
             tabIndex={0}
+            aria-label={`Needs Response: ${metrics.waitingForRequester}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">Needs Response</div>
             <div className="display-6 fw-bold text-warning mb-1">{metrics.waitingForRequester}</div>
@@ -227,9 +233,11 @@ export const RequesterDashboardView: React.FC<RequesterDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateMyTickets("IN_PROGRESS")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateMyTickets("IN_PROGRESS"); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #0dcaf0" }}
             role="button"
             tabIndex={0}
+            aria-label={`In Progress: ${metrics.inProgress}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">In Progress</div>
             <div className="display-6 fw-bold text-info mb-1">{metrics.inProgress}</div>
@@ -242,9 +250,11 @@ export const RequesterDashboardView: React.FC<RequesterDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateMyTickets("RESOLVED")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateMyTickets("RESOLVED"); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #198754" }}
             role="button"
             tabIndex={0}
+            aria-label={`Resolved: ${metrics.resolved}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">Resolved</div>
             <div className="display-6 fw-bold text-success mb-1">{metrics.resolved}</div>
@@ -257,9 +267,11 @@ export const RequesterDashboardView: React.FC<RequesterDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateMyTickets("CLOSED")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateMyTickets("CLOSED"); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #212529" }}
             role="button"
             tabIndex={0}
+            aria-label={`Closed: ${metrics.closed}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">Closed</div>
             <div className="display-6 fw-bold text-dark mb-1">{metrics.closed}</div>

@@ -151,3 +151,29 @@ body {
 .table-responsive::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Accessibility Keyboard Focus Rings */
+:focus-visible {
+  outline: 2px solid #006B3C !important;
+  outline-offset: 2px !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #006B3C !important;
+  outline-offset: 2px !important;
+}
+
+.hover-shadow {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.hover-shadow:hover, .hover-shadow:focus-visible {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px);
+}
+

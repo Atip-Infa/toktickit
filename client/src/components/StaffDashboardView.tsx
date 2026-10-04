@@ -142,9 +142,11 @@ export const StaffDashboardView: React.FC<StaffDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateQueue({ ownerFilter: "unassigned" })}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateQueue({ ownerFilter: "unassigned" }); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #dc3545" }}
             role="button"
             tabIndex={0}
+            aria-label={`Unassigned Tickets: ${quickStats.unassignedTickets}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">Unassigned</div>
             <div className="display-6 fw-bold text-danger mb-1">{quickStats.unassignedTickets}</div>
@@ -157,9 +159,11 @@ export const StaffDashboardView: React.FC<StaffDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateQueue({ ownerFilter: "me" })}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateQueue({ ownerFilter: "me" }); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #055037" }}
             role="button"
             tabIndex={0}
+            aria-label={`My Assigned Tickets: ${metrics.myAssigned}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">My Assigned</div>
             <div className="display-6 fw-bold text-success mb-1" style={{ color: "#055037" }}>
@@ -174,9 +178,11 @@ export const StaffDashboardView: React.FC<StaffDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateQueue({ status: "NEW" })}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateQueue({ status: "NEW" }); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #0d6efd" }}
             role="button"
             tabIndex={0}
+            aria-label={`New Tickets: ${metrics.newTickets}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">New</div>
             <div className="display-6 fw-bold text-primary mb-1">{metrics.newTickets}</div>
@@ -189,9 +195,11 @@ export const StaffDashboardView: React.FC<StaffDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateQueue({ status: "OPEN" })}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateQueue({ status: "OPEN" }); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #0dcaf0" }}
             role="button"
             tabIndex={0}
+            aria-label={`Open Tickets: ${metrics.openTickets}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">Open</div>
             <div className="display-6 fw-bold text-info mb-1">{metrics.openTickets}</div>
@@ -204,9 +212,11 @@ export const StaffDashboardView: React.FC<StaffDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateQueue({ status: "IN_PROGRESS" })}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateQueue({ status: "IN_PROGRESS" }); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #ffc107" }}
             role="button"
             tabIndex={0}
+            aria-label={`In Progress Tickets: ${metrics.inProgress}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">In Progress</div>
             <div className="display-6 fw-bold text-warning mb-1">{metrics.inProgress}</div>
@@ -219,9 +229,11 @@ export const StaffDashboardView: React.FC<StaffDashboardViewProps> = ({
           <div
             className="zen-card p-3 h-100 text-center cursor-pointer hover-shadow"
             onClick={() => onNavigateQueue({ status: "WAITING_FOR_REQUESTER" })}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onNavigateQueue({ status: "WAITING_FOR_REQUESTER" }); } }}
             style={{ cursor: "pointer", borderTop: "4px solid #6c757d" }}
             role="button"
             tabIndex={0}
+            aria-label={`Pending Client Tickets: ${metrics.waitingForRequester}`}
           >
             <div className="text-uppercase extra-small text-muted fw-bold mb-1">Pending Client</div>
             <div className="display-6 fw-bold text-secondary mb-1">{metrics.waitingForRequester}</div>

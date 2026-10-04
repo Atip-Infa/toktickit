@@ -508,17 +508,18 @@ export const UserManagementView: React.FC = () => {
 
       {/* Modal - Create User */}
       {showCreateModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog" aria-modal="true" aria-labelledby="create-user-modal-title">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content zen-card border-0 p-4">
-              <h2 className="h5 fw-bold mb-3">➕ Create New User</h2>
+              <h2 id="create-user-modal-title" className="h5 fw-bold mb-3">➕ Create New User</h2>
 
               {createError && <div className="alert alert-danger py-2 small mb-3">{createError}</div>}
 
               <form onSubmit={handleCreateSubmit}>
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Full Name</label>
+                  <label htmlFor="create-user-name" className="form-label fw-semibold small mb-1">Full Name</label>
                   <input
+                    id="create-user-name"
                     type="text"
                     className="form-control zen-form-control"
                     placeholder="e.g. John Doe"
@@ -529,8 +530,9 @@ export const UserManagementView: React.FC = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Email Address</label>
+                  <label htmlFor="create-user-email" className="form-label fw-semibold small mb-1">Email Address</label>
                   <input
+                    id="create-user-email"
                     type="email"
                     className="form-control zen-form-control"
                     placeholder="e.g. john@toktickit.com"
@@ -542,8 +544,9 @@ export const UserManagementView: React.FC = () => {
 
                 <div className="row g-2 mb-3">
                   <div className="col-6">
-                    <label className="form-label fw-semibold small mb-1">Role</label>
+                    <label htmlFor="create-user-role" className="form-label fw-semibold small mb-1">Role</label>
                     <select
+                      id="create-user-role"
                       className="form-select zen-form-control"
                       value={createRole}
                       onChange={(e) =>
@@ -556,8 +559,9 @@ export const UserManagementView: React.FC = () => {
                     </select>
                   </div>
                   <div className="col-6">
-                    <label className="form-label fw-semibold small mb-1">Department</label>
+                    <label htmlFor="create-user-department" className="form-label fw-semibold small mb-1">Department</label>
                     <input
+                      id="create-user-department"
                       type="text"
                       className="form-control zen-form-control"
                       placeholder="e.g. Computer Science"
@@ -568,8 +572,9 @@ export const UserManagementView: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label className="form-label fw-semibold small mb-1">Initial Password</label>
+                  <label htmlFor="create-user-password" className="form-label fw-semibold small mb-1">Initial Password</label>
                   <input
+                    id="create-user-password"
                     type="text"
                     className="form-control zen-form-control"
                     value={createPassword}
@@ -601,18 +606,19 @@ export const UserManagementView: React.FC = () => {
 
       {/* Modal - Edit User */}
       {editingUser && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog" aria-modal="true" aria-labelledby="edit-user-modal-title">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content zen-card border-0 p-4">
-              <h2 className="h5 fw-bold mb-1">✏️ Edit User Details</h2>
+              <h2 id="edit-user-modal-title" className="h5 fw-bold mb-1">✏️ Edit User Details</h2>
               <p className="text-muted small mb-3">Modify account info for {editingUser.name}</p>
 
               {editError && <div className="alert alert-danger py-2 small mb-3">{editError}</div>}
 
               <form onSubmit={handleEditSubmit}>
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Full Name</label>
+                  <label htmlFor="edit-user-name" className="form-label fw-semibold small mb-1">Full Name</label>
                   <input
+                    id="edit-user-name"
                     type="text"
                     className="form-control zen-form-control"
                     required
@@ -623,8 +629,9 @@ export const UserManagementView: React.FC = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Email Address</label>
+                  <label htmlFor="edit-user-email" className="form-label fw-semibold small mb-1">Email Address</label>
                   <input
+                    id="edit-user-email"
                     type="email"
                     className="form-control zen-form-control"
                     required
@@ -636,8 +643,9 @@ export const UserManagementView: React.FC = () => {
 
                 <div className="row g-2 mb-3">
                   <div className="col-6">
-                    <label className="form-label fw-semibold small mb-1">Role</label>
+                    <label htmlFor="edit-user-role" className="form-label fw-semibold small mb-1">Role</label>
                     <select
+                      id="edit-user-role"
                       className="form-select zen-form-control"
                       value={editRole}
                       disabled={submitting}
@@ -651,8 +659,9 @@ export const UserManagementView: React.FC = () => {
                     </select>
                   </div>
                   <div className="col-6">
-                    <label className="form-label fw-semibold small mb-1">Department</label>
+                    <label htmlFor="edit-user-department" className="form-label fw-semibold small mb-1">Department</label>
                     <input
+                      id="edit-user-department"
                       type="text"
                       className="form-control zen-form-control"
                       value={editDepartment}
@@ -702,10 +711,10 @@ export const UserManagementView: React.FC = () => {
 
       {/* Modal - Reset Password */}
       {resettingUser && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog" aria-modal="true" aria-labelledby="reset-user-modal-title">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content zen-card border-0 p-4">
-              <h2 className="h5 fw-bold mb-1">🔑 Reset Password</h2>
+              <h2 id="reset-user-modal-title" className="h5 fw-bold mb-1">🔑 Reset Password</h2>
               <p className="text-muted small mb-3">
                 Resetting initial password for <strong>{resettingUser.name}</strong> ({resettingUser.email}).
               </p>
@@ -714,8 +723,9 @@ export const UserManagementView: React.FC = () => {
 
               <form onSubmit={handleResetSubmit}>
                 <div className="mb-4">
-                  <label className="form-label fw-semibold small mb-1">New Initial Password</label>
+                  <label htmlFor="reset-user-password" className="form-label fw-semibold small mb-1">New Initial Password</label>
                   <input
+                    id="reset-user-password"
                     type="text"
                     className="form-control zen-form-control"
                     required

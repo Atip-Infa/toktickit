@@ -581,6 +581,9 @@ export const ActionsTakenSection: React.FC<ActionsTakenSectionProps> = ({
               padding: "24px",
             }}
             data-testid="action-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="action-modal-title"
           >
             {/* Modal Header */}
             <div
@@ -593,12 +596,13 @@ export const ActionsTakenSection: React.FC<ActionsTakenSectionProps> = ({
                 paddingBottom: "12px",
               }}
             >
-              <h3 style={{ margin: 0, fontSize: "1.2rem", color: "var(--zg-text, #1e293b)" }}>
+              <h3 id="action-modal-title" style={{ margin: 0, fontSize: "1.2rem", color: "var(--zg-text, #1e293b)" }}>
                 {editingAction ? "Edit Action Taken" : "Add Action Taken"}
               </h3>
               <button
                 type="button"
                 onClick={handleCloseModal}
+                aria-label="Close modal"
                 style={{
                   backgroundColor: "transparent",
                   border: "none",
@@ -925,10 +929,15 @@ export const ActionsTakenSection: React.FC<ActionsTakenSectionProps> = ({
               borderRadius: "8px",
               width: "100%",
               maxWidth: "520px",
+              maxHeight: "90vh",
+              overflowY: "auto",
               boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
               padding: "24px",
             }}
             data-testid="view-action-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="view-action-modal-title"
           >
             <div
               style={{
@@ -940,12 +949,13 @@ export const ActionsTakenSection: React.FC<ActionsTakenSectionProps> = ({
                 paddingBottom: "12px",
               }}
             >
-              <h3 style={{ margin: 0, fontSize: "1.1rem", color: "var(--zg-text, #1e293b)" }}>
+              <h3 id="view-action-modal-title" style={{ margin: 0, fontSize: "1.1rem", color: "var(--zg-text, #1e293b)" }}>
                 Action Taken Details
               </h3>
               <button
                 type="button"
                 onClick={() => setViewingAction(null)}
+                aria-label="Close details modal"
                 style={{
                   backgroundColor: "transparent",
                   border: "none",
