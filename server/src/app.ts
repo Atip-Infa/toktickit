@@ -1177,6 +1177,235 @@ app.post(
 );
 
 // ---------------------------------------------------------------------------
+// Actions Taken APIs (Lab 4)
+// ---------------------------------------------------------------------------
+
+// GET /api/tickets/:id/actions-taken - List Actions Taken for a Ticket
+app.get(
+  "/api/tickets/:id/actions-taken",
+  requireAuth,
+  requirePasswordChanged,
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID", code: "INVALID_INPUT" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found", code: "TICKET_NOT_FOUND" });
+      }
+
+      if (req.user!.role === "REQUESTER" && ticket.requesterId !== req.user!.id) {
+        return res.status(403).json({ error: "Access denied to ticket actions taken", code: "FORBIDDEN" });
+      }
+
+      const actionsTaken = await prisma.actionTaken.findMany({
+        where: { ticketId },
+        orderBy: { actionDate: "asc" },
+        include: {
+          performedBy: {
+            select: { id: true, name: true, email: true, role: true },
+          },
+        },
+      });
+
+      return res.status(200).json({ actionsTaken, data: actionsTaken });
+    } catch {
+      return res.status(500).json({ error: "Failed to fetch actions taken", code: "SERVER_ERROR" });
+    }
+  }
+);
+
+// POST /api/tickets/:id/actions-taken - Create Action Taken (IT Staff & Admin only)
+app.post(
+  "/api/tickets/:id/actions-taken",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("IT_STAFF", "ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      if (!ticketId || isNaN(ticketId)) {
+        return res.status(400).json({ error: "Invalid ticket ID", code: "INVALID_INPUT" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found", code: "TICKET_NOT_FOUND" });
+      }
+
+      const description = typeof req.body.description === "string" ? req.body.description.trim() : "";
+      if (!description) {
+        return res.status(400).json({ error: "Action description is required", code: "INVALID_INPUT" });
+      }
+
+      const result = typeof req.body.result === "string" ? req.body.result.trim() : "";
+      if (!result) {
+        return res.status(400).json({ error: "Action result is required", code: "INVALID_INPUT" });
+      }
+
+      const followUpRequired = Boolean(req.body.followUpRequired);
+      const followUpNote = typeof req.body.followUpNote === "string" ? req.body.followUpNote.trim() : "";
+
+      if (followUpRequired && !followUpNote) {
+        return res.status(400).json({
+          error: "Follow-up note is required when follow-up is requested",
+          code: "MISSING_FOLLOWUP_NOTE",
+        });
+      }
+
+      const attachmentNotes =
+        typeof req.body.attachmentNotes === "string" && req.body.attachmentNotes.trim()
+          ? req.body.attachmentNotes.trim()
+          : null;
+
+      const actionDate =
+        req.body.actionDate && !isNaN(new Date(req.body.actionDate).getTime())
+          ? new Date(req.body.actionDate)
+          : new Date();
+
+      const actionTaken = await prisma.actionTaken.create({
+        data: {
+          ticketId,
+          actionDate,
+          description,
+          result,
+          performedById: req.user!.id,
+          followUpRequired,
+          followUpNote: followUpRequired ? followUpNote : null,
+          attachmentNotes,
+        },
+        include: {
+          performedBy: {
+            select: { id: true, name: true, email: true, role: true },
+          },
+        },
+      });
+
+      return res.status(201).json({ actionTaken, data: actionTaken });
+    } catch {
+      return res.status(500).json({ error: "Failed to create action taken", code: "SERVER_ERROR" });
+    }
+  }
+);
+
+// PATCH /api/tickets/:id/actions-taken/:actionId - Update Action Taken (IT Staff & Admin only)
+app.patch(
+  "/api/tickets/:id/actions-taken/:actionId",
+  requireAuth,
+  requirePasswordChanged,
+  requireRole("IT_STAFF", "ADMINISTRATOR"),
+  async (req: Request, res: Response) => {
+    try {
+      const ticketId = Number(req.params.id);
+      const actionId = Number(req.params.actionId);
+
+      if (!ticketId || isNaN(ticketId) || !actionId || isNaN(actionId)) {
+        return res.status(400).json({ error: "Invalid ticket or action ID", code: "INVALID_INPUT" });
+      }
+
+      const prisma = getPrisma();
+      const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found", code: "TICKET_NOT_FOUND" });
+      }
+
+      const existingAction = await prisma.actionTaken.findFirst({
+        where: { id: actionId, ticketId },
+      });
+      if (!existingAction) {
+        return res.status(404).json({ error: "Action Taken not found", code: "ACTION_TAKEN_NOT_FOUND" });
+      }
+
+      // Concurrency check for stale updates
+      if (req.body.expectedUpdatedAt) {
+        const expectedDate = new Date(req.body.expectedUpdatedAt).toISOString();
+        const currentDate = existingAction.updatedAt.toISOString();
+        if (expectedDate !== currentDate) {
+          return res.status(409).json({
+            error: "Action Taken has been updated by another user",
+            code: "STALE_UPDATE_CONFLICT",
+          });
+        }
+      }
+
+      let description = existingAction.description;
+      if (req.body.description !== undefined) {
+        const descInput = typeof req.body.description === "string" ? req.body.description.trim() : "";
+        if (!descInput) {
+          return res.status(400).json({ error: "Action description cannot be empty", code: "INVALID_INPUT" });
+        }
+        description = descInput;
+      }
+
+      let result = existingAction.result;
+      if (req.body.result !== undefined) {
+        const resultInput = typeof req.body.result === "string" ? req.body.result.trim() : "";
+        if (!resultInput) {
+          return res.status(400).json({ error: "Action result cannot be empty", code: "INVALID_INPUT" });
+        }
+        result = resultInput;
+      }
+
+      const followUpRequired =
+        typeof req.body.followUpRequired === "boolean"
+          ? req.body.followUpRequired
+          : existingAction.followUpRequired;
+
+      let followUpNote = existingAction.followUpNote;
+      if (req.body.followUpNote !== undefined) {
+        followUpNote = typeof req.body.followUpNote === "string" ? req.body.followUpNote.trim() : null;
+      }
+
+      if (followUpRequired && (!followUpNote || !followUpNote.trim())) {
+        return res.status(400).json({
+          error: "Follow-up note is required when follow-up is requested",
+          code: "MISSING_FOLLOWUP_NOTE",
+        });
+      }
+
+      let attachmentNotes = existingAction.attachmentNotes;
+      if (req.body.attachmentNotes !== undefined) {
+        attachmentNotes =
+          typeof req.body.attachmentNotes === "string" && req.body.attachmentNotes.trim()
+            ? req.body.attachmentNotes.trim()
+            : null;
+      }
+
+      const actionDate =
+        req.body.actionDate && !isNaN(new Date(req.body.actionDate).getTime())
+          ? new Date(req.body.actionDate)
+          : existingAction.actionDate;
+
+      const updatedAction = await prisma.actionTaken.update({
+        where: { id: actionId },
+        data: {
+          description,
+          result,
+          followUpRequired,
+          followUpNote: followUpRequired ? followUpNote : null,
+          attachmentNotes,
+          actionDate,
+        },
+        include: {
+          performedBy: {
+            select: { id: true, name: true, email: true, role: true },
+          },
+        },
+      });
+
+      return res.status(200).json({ actionTaken: updatedAction, data: updatedAction });
+    } catch {
+      return res.status(500).json({ error: "Failed to update action taken", code: "SERVER_ERROR" });
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
 // Administrator User Management APIs (Lab 3)
 // ---------------------------------------------------------------------------
 
