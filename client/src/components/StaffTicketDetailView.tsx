@@ -11,6 +11,7 @@ import {
 import { useAuth } from "../context/AuthContext.js";
 import { PublicCommentsSection } from "./PublicCommentsSection.js";
 import { InternalNotesSection } from "./InternalNotesSection.js";
+import { ActionsTakenSection } from "./ActionsTakenSection.js";
 
 interface StaffTicketDetailViewProps {
   ticketId: number;
@@ -335,6 +336,10 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
 
           {(activeTab === "notes" || activeTab === "all") && (
             <InternalNotesSection ticketId={ticket.id} />
+          )}
+
+          {(activeTab === "actions" || activeTab === "all") && (
+            <ActionsTakenSection ticketId={ticket.id} onActionsUpdated={loadTicket} />
           )}
 
           {(activeTab === "attachments" || activeTab === "all") && (
