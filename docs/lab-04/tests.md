@@ -19,29 +19,29 @@ The test strategy covers:
 
 | Requirement ID | Acceptance Criterion | Test ID | Test Type | Target Test File | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `FR-01`, `BR-04` | `AC-01` (Create Action Taken with valid data) | `API-ACT-01` | API | `server/tests/lab-04/actions-taken.api.test.ts` | Planned |
-| `FR-03`, `FR-04` | `AC-02` (Reject missing follow-up note when required) | `API-ACT-02` | API | `server/tests/lab-04/actions-taken.api.test.ts` | Planned |
-| `FR-05`, `BR-03` | `AC-03` (Requester read-only Actions Taken access) | `API-ACT-03` | API | `server/tests/lab-04/actions-taken.api.test.ts` | Planned |
-| `FR-05`, `BR-03` | `AC-04` (Requester create Action Taken denied 403) | `API-ACT-04` | Security | `server/tests/lab-04/actions-taken.api.test.ts` | Planned |
-| `FR-01` | `AC-01` (Edit existing Action Taken by IT Staff) | `API-ACT-05` | API | `server/tests/lab-04/actions-taken.api.test.ts` | Planned |
-| `FR-08`, `BR-07` | `AC-05` (Resolution gate: reject resolve without Action Taken) | `API-WFLOW-01` | API | `server/tests/lab-04/ticket-workflow.api.test.ts` | Planned |
-| `FR-07`, `BR-07` | `AC-06` (Resolution gate: reject resolve without summary) | `API-WFLOW-02` | API | `server/tests/lab-04/ticket-workflow.api.test.ts` | Planned |
-| `FR-07`, `FR-08` | `AC-07` (Resolution gate: succeed with summary + Action Taken) | `API-WFLOW-03` | API | `server/tests/lab-04/ticket-workflow.api.test.ts` | Planned |
-| `FR-06`, `BR-06` | `AC-07` (Permitted status transitions matrix) | `API-WFLOW-04` | API | `server/tests/lab-04/ticket-workflow.api.test.ts` | Planned |
-| `FR-15`, `BR-12` | `AC-11` (Stale update concurrency conflict 409) | `API-WFLOW-05` | Concurrency | `server/tests/lab-04/ticket-workflow.api.test.ts` | Planned |
-| `FR-10`, `BR-09` | `AC-08` (Requester dashboard metrics & recent tickets) | `API-DASH-01` | API | `server/tests/lab-04/requester-dashboard.api.test.ts` | Planned |
-| `FR-10`, `BR-09` | `AC-08` (Requester dashboard ownership protection) | `API-DASH-02` | Security | `server/tests/lab-04/requester-dashboard.api.test.ts` | Planned |
-| `FR-11`, `BR-10` | `AC-09` (IT Staff dashboard operational counts) | `API-DASH-03` | API | `server/tests/lab-04/staff-dashboard.api.test.ts` | Planned |
-| `FR-12`, `BR-11` | `AC-09` (Admin dashboard user stats inclusion) | `API-DASH-04` | API | `server/tests/lab-04/staff-dashboard.api.test.ts` | Planned |
-| `FR-11` | `AC-09` (Requester access to Staff dashboard denied 403) | `API-DASH-05` | Security | `server/tests/lab-04/staff-dashboard.api.test.ts` | Planned |
-| `FR-11`, `FR-14` | `AC-10` (IT Staff Dashboard UI rendering & drill-down) | `UI-DASH-01` | UI | `client/tests/lab-04/StaffDashboard.test.tsx` | Planned |
-| `FR-10`, `FR-14` | `AC-08` (Requester Dashboard UI rendering & drill-down) | `UI-DASH-02` | UI | `client/tests/lab-04/RequesterDashboard.test.tsx` | Planned |
-| `FR-01`-`FR-05` | `AC-01`-`AC-04` (Actions Taken UI component modes & validation) | `UI-ACT-01` | UI | `client/tests/lab-04/ActionsTaken.test.tsx` | Planned |
-| `FR-07`, `FR-08` | `AC-05`-`AC-07` (Resolution Gate UI alert callout) | `UI-WFLOW-01` | UI | `client/tests/lab-04/TicketWorkflow.test.tsx` | Planned |
-| `FR-01`-`FR-05` | `AC-01`-`AC-04` (End-to-End Actions Taken creation & view flow) | `E2E-ACT-01` | E2E | `e2e/lab-04/actions-taken-flow.spec.ts` | Planned |
-| `FR-06`-`FR-08` | `AC-05`-`AC-07` (End-to-End Ticket Resolution Gate workflow) | `E2E-WFLOW-01` | E2E | `e2e/lab-04/ticket-resolution.spec.ts` | Planned |
-| `FR-10`-`FR-14` | `AC-08`-`AC-10` (End-to-End Dashboards & drill-down flow) | `E2E-DASH-01` | E2E | `e2e/lab-04/dashboards.spec.ts` | Planned |
-| `FR-16` | `AC-12` (Complete Labs 1–3 Regression Suite) | `E2E-REG-01` | Regression | `e2e/lab-04/regression-full.spec.ts` | Planned |
+| `FR-01`, `BR-04` | `AC-01` (Create Action Taken with valid data) | `API-ACT-01` | API | `server/tests/lab-04/actions-taken.api.test.ts` | Passed |
+| `FR-03`, `FR-04` | `AC-02` (Reject missing follow-up note when required) | `API-ACT-02` | API | `server/tests/lab-04/actions-taken.api.test.ts` | Passed |
+| `FR-05`, `BR-03` | `AC-03` (Requester read-only Actions Taken access) | `API-ACT-03` | API | `server/tests/lab-04/actions-taken.api.test.ts` | Passed |
+| `FR-05`, `BR-03` | `AC-04` (Requester create Action Taken denied 403) | `API-ACT-04` | Security | `server/tests/lab-04/actions-taken.api.test.ts` | Passed |
+| `FR-01` | `AC-01` (Edit existing Action Taken by IT Staff) | `API-ACT-05` | API | `server/tests/lab-04/actions-taken.api.test.ts` | Passed |
+| `FR-08`, `BR-07` | `AC-05` (Resolution gate: reject resolve without Action Taken) | `API-WFLOW-01` | API | `server/tests/lab-04/ticket-workflow.api.test.ts` | Passed |
+| `FR-07`, `BR-07` | `AC-06` (Resolution gate: reject resolve without summary) | `API-WFLOW-02` | API | `server/tests/lab-04/ticket-workflow.api.test.ts` | Passed |
+| `FR-07`, `FR-08` | `AC-07` (Resolution gate: succeed with summary + Action Taken) | `API-WFLOW-03` | API | `server/tests/lab-04/ticket-workflow.api.test.ts` | Passed |
+| `FR-06`, `BR-06` | `AC-07` (Permitted status transitions matrix) | `API-WFLOW-04` | API | `server/tests/lab-04/ticket-workflow.api.test.ts` | Passed |
+| `FR-15`, `BR-12` | `AC-11` (Stale update concurrency conflict 409) | `API-WFLOW-05` | Concurrency | `server/tests/lab-04/ticket-workflow.api.test.ts` | Passed |
+| `FR-10`, `BR-09` | `AC-08` (Requester dashboard metrics & recent tickets) | `API-DASH-01` | API | `server/tests/lab-04/requester-dashboard.api.test.ts` | Passed |
+| `FR-10`, `BR-09` | `AC-08` (Requester dashboard ownership protection) | `API-DASH-02` | Security | `server/tests/lab-04/requester-dashboard.api.test.ts` | Passed |
+| `FR-11`, `BR-10` | `AC-09` (IT Staff dashboard operational counts) | `API-DASH-03` | API | `server/tests/lab-04/staff-dashboard.api.test.ts` | Passed |
+| `FR-12`, `BR-11` | `AC-09` (Admin dashboard user stats inclusion) | `API-DASH-04` | API | `server/tests/lab-04/staff-dashboard.api.test.ts` | Passed |
+| `FR-11` | `AC-09` (Requester access to Staff dashboard denied 403) | `API-DASH-05` | Security | `server/tests/lab-04/staff-dashboard.api.test.ts` | Passed |
+| `FR-11`, `FR-14` | `AC-10` (IT Staff Dashboard UI rendering & drill-down) | `UI-DASH-01` | UI | `client/tests/lab-04/StaffDashboard.test.tsx` | Passed |
+| `FR-10`, `FR-14` | `AC-08` (Requester Dashboard UI rendering & drill-down) | `UI-DASH-02` | UI | `client/tests/lab-04/RequesterDashboard.test.tsx` | Passed |
+| `FR-01`-`FR-05` | `AC-01`-`AC-04` (Actions Taken UI component modes & validation) | `UI-ACT-01` | UI | `client/tests/lab-04/ActionsTaken.test.tsx` | Passed |
+| `FR-07`, `FR-08` | `AC-05`-`AC-07` (Resolution Gate UI alert callout) | `UI-WFLOW-01` | UI | `client/tests/lab-04/TicketWorkflow.test.tsx` | Passed |
+| `FR-01`-`FR-05` | `AC-01`-`AC-04` (End-to-End Actions Taken creation & view flow) | `E2E-ACT-01` | E2E | `e2e/lab-04/actions-taken-flow.spec.ts` | Passed |
+| `FR-06`-`FR-08` | `AC-05`-`AC-07` (End-to-End Ticket Resolution Gate workflow) | `E2E-WFLOW-01` | E2E | `e2e/lab-04/ticket-resolution.spec.ts` | Passed |
+| `FR-10`-`FR-14` | `AC-08`-`AC-10` (End-to-End Dashboards & drill-down flow) | `E2E-DASH-01` | E2E | `e2e/lab-04/dashboards.spec.ts` | Passed |
+| `FR-16` | `AC-12` (Complete Labs 1–3 Regression Suite) | `E2E-REG-01` | Regression | `e2e/lab-04/regression-full.spec.ts` | Passed |
 
 ---
 
