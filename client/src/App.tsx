@@ -9,10 +9,12 @@ import { DevelopmentRequesterSelector } from "./components/DevelopmentRequesterS
 import { CreateTicketForm } from "./components/CreateTicketForm.js";
 import { MyTicketsView } from "./components/MyTicketsView.js";
 import { TicketDetailView } from "./components/TicketDetailView.js";
+import { RequesterDashboardView } from "./components/RequesterDashboardView.js";
 import { getAuthToken } from "./api.js";
 
 import { StaffTicketQueueView } from "./components/StaffTicketQueueView.js";
 import { StaffTicketDetailView } from "./components/StaffTicketDetailView.js";
+import { StaffDashboardView } from "./components/StaffDashboardView.js";
 import { UserManagementView } from "./components/UserManagementView.js";
 
 function MainApp() {
@@ -20,6 +22,8 @@ function MainApp() {
   const { selectedRequester } = useRequester();
   const [currentView, setCurrentView] = useState<string>("my-tickets");
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [myTicketsStatusFilter, setMyTicketsStatusFilter] = useState<string>("");
+  const [queueFilters, setQueueFilters] = useState<{ status?: string; ownerFilter?: string; priority?: string }>({});
   const [authMode, setAuthMode] = useState<"login" | "dev-selector">(() => {
     return getAuthToken() ? "login" : "dev-selector";
   });
@@ -27,11 +31,9 @@ function MainApp() {
   useEffect(() => {
     if (user) {
       if (user.role === "REQUESTER") {
-        setCurrentView("my-tickets");
-      } else if (user.role === "IT_STAFF") {
-        setCurrentView("staff-queue");
-      } else if (user.role === "ADMINISTRATOR") {
-        setCurrentView("user-management");
+        setCurrentView("requester-dashboard");
+      } else if (user.role === "IT_STAFF" || user.role === "ADMINISTRATOR") {
+        setCurrentView("staff-dashboard");
       }
     }
   }, [user?.role]);
@@ -65,8 +67,23 @@ function MainApp() {
       <AppHeader currentView={currentView} onNavigate={setCurrentView} />
 
       <main className="flex-grow-1">
+        {currentView === "requester-dashboard" && (
+          <RequesterDashboardView
+            onCreateTicketClick={() => setCurrentView("create-ticket")}
+            onSelectTicket={(ticketId) => {
+              setSelectedTicketId(ticketId);
+              setCurrentView("ticket-detail");
+            }}
+            onNavigateMyTickets={(statusFilter) => {
+              setMyTicketsStatusFilter(statusFilter || "");
+              setCurrentView("my-tickets");
+            }}
+          />
+        )}
+
         {currentView === "my-tickets" && (
           <MyTicketsView
+            initialStatus={myTicketsStatusFilter}
             onCreateTicketClick={() => setCurrentView("create-ticket")}
             onSelectTicket={(ticketId) => {
               setSelectedTicketId(ticketId);
@@ -89,8 +106,24 @@ function MainApp() {
           />
         )}
 
+        {currentView === "staff-dashboard" && (
+          <StaffDashboardView
+            onSelectTicket={(ticketId) => {
+              setSelectedTicketId(ticketId);
+              setCurrentView("staff-ticket-detail");
+            }}
+            onNavigateQueue={(filters) => {
+              setQueueFilters(filters || {});
+              setCurrentView("staff-queue");
+            }}
+          />
+        )}
+
         {currentView === "staff-queue" && (
           <StaffTicketQueueView
+            initialStatus={queueFilters.status || ""}
+            initialOwnerFilter={queueFilters.ownerFilter || ""}
+            initialPriority={queueFilters.priority || ""}
             onSelectTicket={(ticketId) => {
               setSelectedTicketId(ticketId);
               setCurrentView("staff-ticket-detail");

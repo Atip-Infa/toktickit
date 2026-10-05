@@ -117,6 +117,17 @@ describe("Lab 3 IT Staff Ticket Detail & Workflow Authorization APIs", () => {
         .set("Authorization", `Bearer ${staffToken}`)
         .send({ status: "IN_PROGRESS" });
 
+      // Add Action Taken (required by Lab 4 resolution gate)
+      const staffUser = await prisma.user.findUnique({ where: { email: "michael@toktickit.com" } });
+      await prisma.actionTaken.create({
+        data: {
+          ticketId: testTicketId,
+          performedById: staffUser!.id,
+          description: "Applied resolution patch.",
+          result: "Issue resolved",
+        },
+      });
+
       const res = await request(app)
         .patch(`/api/staff/tickets/${testTicketId}`)
         .set("Authorization", `Bearer ${staffToken}`)
@@ -131,6 +142,17 @@ describe("Lab 3 IT Staff Ticket Detail & Workflow Authorization APIs", () => {
     });
 
     it("rejects invalid status transitions (e.g. CLOSED to IN_PROGRESS)", async () => {
+      // Add Action Taken (required by Lab 4 resolution gate)
+      const staffUser = await prisma.user.findUnique({ where: { email: "michael@toktickit.com" } });
+      await prisma.actionTaken.create({
+        data: {
+          ticketId: testTicketId,
+          performedById: staffUser!.id,
+          description: "Investigated and fixed problem.",
+          result: "Completed work",
+        },
+      });
+
       // Move NEW -> IN_PROGRESS -> RESOLVED -> CLOSED
       await request(app)
         .patch(`/api/staff/tickets/${testTicketId}`)

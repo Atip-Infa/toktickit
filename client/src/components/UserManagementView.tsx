@@ -48,6 +48,7 @@ export const UserManagementView: React.FC = () => {
   // Form states - Reset Password
   const [newPassword, setNewPassword] = useState<string>("Password123!");
   const [resetError, setResetError] = useState<string>("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -89,6 +90,7 @@ export const UserManagementView: React.FC = () => {
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     setCreateError("");
 
     if (!createName.trim() || !createEmail.trim()) {
@@ -96,6 +98,7 @@ export const UserManagementView: React.FC = () => {
       return;
     }
 
+    setSubmitting(true);
     try {
       await createAdminUser({
         name: createName.trim(),
@@ -114,6 +117,8 @@ export const UserManagementView: React.FC = () => {
       loadUsers();
     } catch (err: any) {
       setCreateError(err?.message || "Failed to create user");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -129,7 +134,7 @@ export const UserManagementView: React.FC = () => {
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingUser) return;
+    if (!editingUser || submitting) return;
     setEditError("");
 
     if (!editName.trim() || !editEmail.trim()) {
@@ -137,6 +142,7 @@ export const UserManagementView: React.FC = () => {
       return;
     }
 
+    setSubmitting(true);
     try {
       await updateAdminUser(editingUser.id, {
         name: editName.trim(),
@@ -151,14 +157,17 @@ export const UserManagementView: React.FC = () => {
       loadUsers();
     } catch (err: any) {
       setEditError(err?.message || "Failed to update user");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleResetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resettingUser) return;
+    if (!resettingUser || submitting) return;
     setResetError("");
 
+    setSubmitting(true);
     try {
       await resetAdminUserPassword(resettingUser.id, newPassword.trim());
       setResettingUser(null);
@@ -167,6 +176,8 @@ export const UserManagementView: React.FC = () => {
       loadUsers();
     } catch (err: any) {
       setResetError(err?.message || "Failed to reset password");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -497,17 +508,18 @@ export const UserManagementView: React.FC = () => {
 
       {/* Modal - Create User */}
       {showCreateModal && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog" aria-modal="true" aria-labelledby="create-user-modal-title">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content zen-card border-0 p-4">
-              <h2 className="h5 fw-bold mb-3">➕ Create New User</h2>
+              <h2 id="create-user-modal-title" className="h5 fw-bold mb-3">➕ Create New User</h2>
 
               {createError && <div className="alert alert-danger py-2 small mb-3">{createError}</div>}
 
               <form onSubmit={handleCreateSubmit}>
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Full Name</label>
+                  <label htmlFor="create-user-name" className="form-label fw-semibold small mb-1">Full Name</label>
                   <input
+                    id="create-user-name"
                     type="text"
                     className="form-control zen-form-control"
                     placeholder="e.g. John Doe"
@@ -518,8 +530,9 @@ export const UserManagementView: React.FC = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Email Address</label>
+                  <label htmlFor="create-user-email" className="form-label fw-semibold small mb-1">Email Address</label>
                   <input
+                    id="create-user-email"
                     type="email"
                     className="form-control zen-form-control"
                     placeholder="e.g. john@toktickit.com"
@@ -531,8 +544,9 @@ export const UserManagementView: React.FC = () => {
 
                 <div className="row g-2 mb-3">
                   <div className="col-6">
-                    <label className="form-label fw-semibold small mb-1">Role</label>
+                    <label htmlFor="create-user-role" className="form-label fw-semibold small mb-1">Role</label>
                     <select
+                      id="create-user-role"
                       className="form-select zen-form-control"
                       value={createRole}
                       onChange={(e) =>
@@ -545,8 +559,9 @@ export const UserManagementView: React.FC = () => {
                     </select>
                   </div>
                   <div className="col-6">
-                    <label className="form-label fw-semibold small mb-1">Department</label>
+                    <label htmlFor="create-user-department" className="form-label fw-semibold small mb-1">Department</label>
                     <input
+                      id="create-user-department"
                       type="text"
                       className="form-control zen-form-control"
                       placeholder="e.g. Computer Science"
@@ -557,8 +572,9 @@ export const UserManagementView: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label className="form-label fw-semibold small mb-1">Initial Password</label>
+                  <label htmlFor="create-user-password" className="form-label fw-semibold small mb-1">Initial Password</label>
                   <input
+                    id="create-user-password"
                     type="text"
                     className="form-control zen-form-control"
                     value={createPassword}
@@ -574,11 +590,12 @@ export const UserManagementView: React.FC = () => {
                     type="button"
                     className="btn zen-btn-secondary"
                     onClick={() => setShowCreateModal(false)}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn zen-btn-primary">
-                    Create User
+                  <button type="submit" className="btn zen-btn-primary" disabled={submitting}>
+                    {submitting ? "Creating..." : "Create User"}
                   </button>
                 </div>
               </form>
@@ -589,43 +606,49 @@ export const UserManagementView: React.FC = () => {
 
       {/* Modal - Edit User */}
       {editingUser && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog" aria-modal="true" aria-labelledby="edit-user-modal-title">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content zen-card border-0 p-4">
-              <h2 className="h5 fw-bold mb-1">✏️ Edit User Details</h2>
+              <h2 id="edit-user-modal-title" className="h5 fw-bold mb-1">✏️ Edit User Details</h2>
               <p className="text-muted small mb-3">Modify account info for {editingUser.name}</p>
 
               {editError && <div className="alert alert-danger py-2 small mb-3">{editError}</div>}
 
               <form onSubmit={handleEditSubmit}>
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Full Name</label>
+                  <label htmlFor="edit-user-name" className="form-label fw-semibold small mb-1">Full Name</label>
                   <input
+                    id="edit-user-name"
                     type="text"
                     className="form-control zen-form-control"
                     required
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
+                    disabled={submitting}
                   />
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Email Address</label>
+                  <label htmlFor="edit-user-email" className="form-label fw-semibold small mb-1">Email Address</label>
                   <input
+                    id="edit-user-email"
                     type="email"
                     className="form-control zen-form-control"
                     required
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
+                    disabled={submitting}
                   />
                 </div>
 
                 <div className="row g-2 mb-3">
                   <div className="col-6">
-                    <label className="form-label fw-semibold small mb-1">Role</label>
+                    <label htmlFor="edit-user-role" className="form-label fw-semibold small mb-1">Role</label>
                     <select
+                      id="edit-user-role"
                       className="form-select zen-form-control"
                       value={editRole}
+                      disabled={submitting}
                       onChange={(e) =>
                         setEditRole(e.target.value as "REQUESTER" | "IT_STAFF" | "ADMINISTRATOR")
                       }
@@ -636,11 +659,13 @@ export const UserManagementView: React.FC = () => {
                     </select>
                   </div>
                   <div className="col-6">
-                    <label className="form-label fw-semibold small mb-1">Department</label>
+                    <label htmlFor="edit-user-department" className="form-label fw-semibold small mb-1">Department</label>
                     <input
+                      id="edit-user-department"
                       type="text"
                       className="form-control zen-form-control"
                       value={editDepartment}
+                      disabled={submitting}
                       onChange={(e) => setEditDepartment(e.target.value)}
                     />
                   </div>
@@ -652,7 +677,7 @@ export const UserManagementView: React.FC = () => {
                     type="checkbox"
                     id="activeSwitch"
                     checked={editIsActive}
-                    disabled={currentAdmin?.id === editingUser.id}
+                    disabled={currentAdmin?.id === editingUser.id || submitting}
                     onChange={(e) => setEditIsActive(e.target.checked)}
                   />
                   <label className="form-check-label fw-semibold small" htmlFor="activeSwitch">
@@ -670,11 +695,12 @@ export const UserManagementView: React.FC = () => {
                     type="button"
                     className="btn zen-btn-secondary"
                     onClick={() => setEditingUser(null)}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn zen-btn-primary">
-                    Save Changes
+                  <button type="submit" className="btn zen-btn-primary" disabled={submitting}>
+                    {submitting ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </form>
@@ -685,10 +711,10 @@ export const UserManagementView: React.FC = () => {
 
       {/* Modal - Reset Password */}
       {resettingUser && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog" aria-modal="true" aria-labelledby="reset-user-modal-title">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content zen-card border-0 p-4">
-              <h2 className="h5 fw-bold mb-1">🔑 Reset Password</h2>
+              <h2 id="reset-user-modal-title" className="h5 fw-bold mb-1">🔑 Reset Password</h2>
               <p className="text-muted small mb-3">
                 Resetting initial password for <strong>{resettingUser.name}</strong> ({resettingUser.email}).
               </p>
@@ -697,13 +723,15 @@ export const UserManagementView: React.FC = () => {
 
               <form onSubmit={handleResetSubmit}>
                 <div className="mb-4">
-                  <label className="form-label fw-semibold small mb-1">New Initial Password</label>
+                  <label htmlFor="reset-user-password" className="form-label fw-semibold small mb-1">New Initial Password</label>
                   <input
+                    id="reset-user-password"
                     type="text"
                     className="form-control zen-form-control"
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={submitting}
                   />
                   <div className="text-muted extra-small mt-1">
                     Resetting sets <code>mustChangePassword: true</code> so user changes password on next login.
@@ -715,11 +743,12 @@ export const UserManagementView: React.FC = () => {
                     type="button"
                     className="btn zen-btn-secondary"
                     onClick={() => setResettingUser(null)}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-danger">
-                    Confirm Reset
+                  <button type="submit" className="btn btn-danger" disabled={submitting}>
+                    {submitting ? "Resetting..." : "Confirm Reset"}
                   </button>
                 </div>
               </form>

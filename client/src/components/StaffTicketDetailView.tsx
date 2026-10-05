@@ -11,6 +11,7 @@ import {
 import { useAuth } from "../context/AuthContext.js";
 import { PublicCommentsSection } from "./PublicCommentsSection.js";
 import { InternalNotesSection } from "./InternalNotesSection.js";
+import { ActionsTakenSection } from "./ActionsTakenSection.js";
 
 interface StaffTicketDetailViewProps {
   ticketId: number;
@@ -94,6 +95,7 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
         status,
         ownerId: ownerParam,
         resolutionSummary: status === "RESOLVED" || status === "CLOSED" ? resolutionSummary : undefined,
+        expectedUpdatedAt: ticket?.updatedAt,
       });
 
       setTicket(updated);
@@ -337,6 +339,10 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
             <InternalNotesSection ticketId={ticket.id} />
           )}
 
+          {(activeTab === "actions" || activeTab === "all") && (
+            <ActionsTakenSection ticketId={ticket.id} onActionsUpdated={loadTicket} />
+          )}
+
           {(activeTab === "attachments" || activeTab === "all") && (
             <div className="card shadow-sm border mb-4">
               <div className="card-header bg-light py-3">
@@ -422,8 +428,9 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
             <form onSubmit={handleSaveChanges}>
               {/* IT Priority */}
               <div className="mb-3">
-                <label className="form-label fw-semibold small mb-1">IT Priority</label>
+                <label htmlFor="staffItPrioritySelect" className="form-label fw-semibold small mb-1">IT Priority</label>
                 <select
+                  id="staffItPrioritySelect"
                   className="form-select zen-form-control form-select-sm"
                   value={itPriority}
                   onChange={(e) => setItPriority(e.target.value)}
@@ -440,8 +447,9 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
 
               {/* Status Transition */}
               <div className="mb-3">
-                <label className="form-label fw-semibold small mb-1">Ticket Status</label>
+                <label htmlFor="staffTicketStatusSelect" className="form-label fw-semibold small mb-1">Ticket Status</label>
                 <select
+                  id="staffTicketStatusSelect"
                   className="form-select zen-form-control form-select-sm"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
@@ -488,14 +496,17 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
               {/* Resolution Summary (Required when Resolving) */}
               {(status === "RESOLVED" || status === "CLOSED") && (
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-1">Resolution Summary</label>
+                  <label className="form-label fw-semibold small mb-1">Resolution Summary <span className="text-danger">*</span></label>
                   <textarea
-                    className="form-control zen-form-control form-control-sm"
+                    className="form-control zen-form-control form-control-sm mb-1"
                     rows={3}
                     placeholder="Describe how the problem was resolved..."
                     value={resolutionSummary}
                     onChange={(e) => setResolutionSummary(e.target.value)}
                   />
+                  <div className="text-muted extra-small">
+                    ℹ️ Resolution requires a non-empty summary and at least 1 Action Taken record.
+                  </div>
                 </div>
               )}
 
@@ -538,17 +549,21 @@ export const StaffTicketDetailView: React.FC<StaffTicketDetailViewProps> = ({ ti
 
       {/* Soft Removal Modal */}
       {removingAttachmentId && (
-        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} role="dialog" aria-modal="true" aria-labelledby="staff-removal-modal-title">
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content zen-card border-0 p-4">
-              <h2 className="h5 fw-bold mb-2">Remove Attachment</h2>
+              <h2 id="staff-removal-modal-title" className="h5 fw-bold mb-2">Remove Attachment</h2>
               <p className="text-muted small mb-3">
                 Specify a reason for soft-removing this attachment.
               </p>
 
               {removalError && <div className="alert alert-danger py-2 small mb-2">{removalError}</div>}
 
+              <label htmlFor="staff-removal-reason-input" className="form-label fw-semibold small mb-1">
+                Removal Reason <span className="text-danger">*</span>
+              </label>
               <textarea
+                id="staff-removal-reason-input"
                 className="form-control zen-form-control mb-3"
                 rows={3}
                 placeholder="Reason for removal (min 3 characters)..."

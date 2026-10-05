@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "npm run test:server && npm run test:client",
     "test:server": "npm --prefix server test",
     "test:client": "npm --prefix client test",
     "test:e2e": "npx playwright test",
     "test:lab-02": "npm --prefix server test -- tests/lab-02 && npm --prefix client test -- tests/lab-02",
-    "test:lab-03": "npm run test:server && npm run test:client && npm run test:e2e"
+    "test:lab-03": "npm run test:server && npm run test:client && npm run test:e2e",
+    "test:lab-04": "npm run test:server && npm run test:client"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

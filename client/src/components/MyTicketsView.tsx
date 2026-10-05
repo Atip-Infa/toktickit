@@ -11,11 +11,13 @@ import { useAuth } from "../context/AuthContext.js";
 interface MyTicketsViewProps {
   onCreateTicketClick?: () => void;
   onSelectTicket?: (ticketId: number) => void;
+  initialStatus?: string;
 }
 
 export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
   onCreateTicketClick,
   onSelectTicket,
+  initialStatus = "",
 }) => {
   const { selectedRequester } = useRequester();
   const { user } = useAuth();
@@ -29,7 +31,7 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedPriority, setSelectedPriority] = useState<string>("");
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>(initialStatus);
   const [sortBy, setSortBy] = useState<string>("createdAt");
   const [sortOrder, setSortOrder] = useState<string>("desc");
   const [page, setPage] = useState<number>(1);

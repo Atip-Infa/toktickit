@@ -11,6 +11,7 @@ import {
 import { useRequester } from "../context/RequesterContext.js";
 import { useAuth } from "../context/AuthContext.js";
 import { PublicCommentsSection } from "./PublicCommentsSection.js";
+import { ActionsTakenSection } from "./ActionsTakenSection.js";
 
 interface TicketDetailViewProps {
   ticketId: number;
@@ -437,6 +438,9 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
         </div>
       </div>
 
+      {/* Actions Taken Section */}
+      {ticket && <ActionsTakenSection ticketId={ticket.id} />}
+
       {/* Public Comments */}
       {ticket && <PublicCommentsSection ticketId={ticket.id} />}
 
@@ -445,9 +449,12 @@ export const TicketDetailView: React.FC<TicketDetailViewProps> = ({
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
           style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ticket-removal-modal-title"
         >
           <div className="zen-card p-4" style={{ maxWidth: "460px", width: "90%" }}>
-            <h3 className="h6 fw-bold mb-2">Remove Attachment</h3>
+            <h3 id="ticket-removal-modal-title" className="h6 fw-bold mb-2">Remove Attachment</h3>
             <p className="text-muted small mb-3">
               Soft-removing this attachment retains its metadata record in database while disabling future downloads. A removal reason is required.
             </p>
