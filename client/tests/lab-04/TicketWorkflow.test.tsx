@@ -33,7 +33,6 @@ const sampleTicket: api.Ticket = {
   updatedAt: new Date().toISOString(),
   requesterId: 1,
   requester: sampleRequesterUser,
-  ownerId: 2,
   owner: sampleStaffUser,
   itOwnerName: "Michael Staff",
   categoryId: 1,

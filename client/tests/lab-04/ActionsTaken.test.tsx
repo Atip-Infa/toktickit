@@ -57,7 +57,7 @@ vi.mock("../../src/context/AuthContext.js", () => ({
 
 describe("ActionsTakenSection Component (Lab 4)", () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
     currentMockUser = mockStaffUser;
   });
 
