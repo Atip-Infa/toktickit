@@ -55,7 +55,6 @@ test.describe("Complete Lab 4 Screenshot Evidence Capture", () => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await loginAs(page, "michael@toktickit.com");
 
-      // IT Staff Dashboard tab if present or default view
       const dashboardTab = page.locator("a:has-text('Dashboard'), button:has-text('Dashboard')").first();
       if (await dashboardTab.isVisible()) {
         await dashboardTab.click();
@@ -104,10 +103,10 @@ test.describe("Complete Lab 4 Screenshot Evidence Capture", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await loginAs(page, "michael@toktickit.com");
 
-    // Open Staff Ticket Queue
-    const queueTab = page.locator("a:has-text('Queue'), a:has-text('My Queue'), button:has-text('Queue')").first();
-    if (await queueTab.isVisible()) {
-      await queueTab.click();
+    // Open Staff Ticket Queue explicitly
+    const queueBtn = page.locator("button:has-text('Open Ticket Queue'), button:has-text('Support Queue'), button:has-text('View Queue'), a:has-text('Queue')").first();
+    if (await queueBtn.isVisible()) {
+      await queueBtn.click();
       await page.waitForTimeout(1000);
     }
 
@@ -116,8 +115,8 @@ test.describe("Complete Lab 4 Screenshot Evidence Capture", () => {
       fullPage: true,
     });
 
-    // Open Ticket Detail
-    const openDetailBtn = page.locator("button:has-text('Open Ticket Detail'), button:has-text('View'), a:has-text('Open')").first();
+    // Click Open Ticket Detail
+    const openDetailBtn = page.locator("button:has-text('Open Ticket Detail')").first();
     if (await openDetailBtn.isVisible()) {
       await openDetailBtn.click();
       await page.waitForTimeout(1500);
@@ -133,21 +132,23 @@ test.describe("Complete Lab 4 Screenshot Evidence Capture", () => {
       );
 
       // Screenshot 2: Create Action Taken Modal
-      const addActionBtn = page.locator("button:has-text('Add Action'), button:has-text('Record Action'), button:has-text('Add Action Taken')").first();
+      const addActionBtn = page.locator('[data-testid="add-action-taken-btn"]').first();
       if (await addActionBtn.isVisible()) {
         await addActionBtn.click();
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(800);
         await page.screenshot({
           path: path.join(rootDir, "actions-taken", "create-action-modal.png"),
+          fullPage: true,
         });
 
-        // Trigger Validation Error on empty form
-        const submitBtn = page.locator("div[role='dialog'] button[type='submit'], form button[type='submit']").first();
+        // Screenshot 3: Trigger Validation Error
+        const submitBtn = page.locator("form button[type='submit'], button:has-text('Save Action')").first();
         if (await submitBtn.isVisible()) {
           await submitBtn.click();
           await page.waitForTimeout(500);
           await page.screenshot({
             path: path.join(rootDir, "actions-taken", "validation-error.png"),
+            fullPage: true,
           });
         }
 
@@ -155,13 +156,14 @@ test.describe("Complete Lab 4 Screenshot Evidence Capture", () => {
         if (await cancelBtn.isVisible()) await cancelBtn.click();
       }
 
-      // Screenshot 3: Status Transition & Resolution Gate
+      // Screenshot 4: Status Transition Modal
       const changeStatusBtn = page.locator("button:has-text('Change Status'), button:has-text('Update Status')").first();
       if (await changeStatusBtn.isVisible()) {
         await changeStatusBtn.click();
         await page.waitForTimeout(500);
         await page.screenshot({
           path: path.join(rootDir, "ticket-workflow", "status-transition-modal.png"),
+          fullPage: true,
         });
 
         const cancelStatusBtn = page.locator("button:has-text('Cancel')").first();
@@ -172,7 +174,7 @@ test.describe("Complete Lab 4 Screenshot Evidence Capture", () => {
     // 3. Requester Read-Only View & Advisory Indication
     await loginAs(page, "jennifer@toktickit.com");
 
-    const reqTicketBtn = page.locator("button:has-text('Open Ticket Detail'), a:has-text('Open')").first();
+    const reqTicketBtn = page.locator("button:has-text('Open Ticket Detail'), button:has-text('View Ticket')").first();
     if (await reqTicketBtn.isVisible()) {
       await reqTicketBtn.click();
       await page.waitForTimeout(1500);
@@ -182,18 +184,19 @@ test.describe("Complete Lab 4 Screenshot Evidence Capture", () => {
         fullPage: true,
       });
 
-      const appearResolvedBtn = page.locator("button:has-text('Problem Appears Resolved'), button:has-text('Appears Resolved')").first();
+      const appearResolvedBtn = page.locator("button:has-text('Problem Appears Resolved')").first();
       if (await appearResolvedBtn.isVisible()) {
         await page.screenshot({
           path: path.join(rootDir, "requester-dashboard", "appears-resolved-advisory.png"),
+          fullPage: true,
         });
       }
     }
 
-    // 4. Admin User Management & System Stats
+    // 4. Admin User Management Screen
     await loginAs(page, "admin@toktickit.com");
 
-    const adminNav = page.locator("a:has-text('User Management'), a:has-text('Admin')").first();
+    const adminNav = page.locator("button:has-text('Administrator User Management'), button:has-text('User Management'), a:has-text('Admin')").first();
     if (await adminNav.isVisible()) {
       await adminNav.click();
       await page.waitForTimeout(1000);

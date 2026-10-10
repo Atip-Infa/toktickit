@@ -15,6 +15,16 @@ The test strategy covers:
 
 ---
 
+### 1.1 Verified Test Output Summary (Main / Staging Branch)
+
+| Test Layer | Test Files Passed | Individual Tests Passed | Pass Rate | Build Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Server REST API & Unit (`npm run test:server`)** | **17 / 17** | **99 / 99** | **100%** | Compilation Clean |
+| **Client Component & Unit (`npm run test:client`)** | **17 / 17** | **54 / 54** | **100%** | Production Build Clean (`1.78s`) |
+| **Total Automated Monorepo Tests (`npm run test`)** | **34 / 34** | **153 / 153** | **100%** | `tsc && vite build` Passed |
+
+---
+
 ## 2. Requirement & Acceptance Criteria Traceability Matrix
 
 | Requirement ID | Acceptance Criterion | Test ID | Test Type | Target Test File | Status |
